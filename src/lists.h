@@ -51,12 +51,12 @@ class Lists {
         boost::regex r_watched_keywords;
         boost::regex r_blacklisted_websites;
         boost::regex r_blacklisted_usernames;
-        boost::regex r_numbers ("(?<=\D|^)\+?(?:\d[\W_]*){8,13}\d(?=\D|$)");
+        boost::regex r_numbers("(?<=\D|^)\+?(?:\d[\W_]*){8,13}\d(?=\D|$)", boost::regex::icase);
 
         /* Sets are faster than Hong Kong journalists! */
         /* First set is for processed numbers, second for normalized ones */
-        std::pair<std::set<std::string>, std::set<std::string>> bad_numbers_normalized;
-        std::pair<std::set<std::string>, std::set<std::string>> watched_numbers_normalized;
+        std::pair<std::set<std::string>, std::set<std::string>> bad_numbers_pair;
+        std::pair<std::set<std::string>, std::set<std::string>> watched_numbers_pair;
 
         std::pair<bool, std::string> match(std::string s, boost::regex e);
 }

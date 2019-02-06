@@ -16,6 +16,8 @@
  - a logging system (spdlog)
  - Whitelisted links
  - Strip code blocks in Rule::run, if need be.
+ - repeating words filter (modify regex to avoid multiple named capture groups, since boost does not
+   behave well with them) https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L484
 
 ----------------
 

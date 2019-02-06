@@ -65,12 +65,12 @@ Lists::Lists(std::string file) {
 
     boost::regex e ("\D");
     for (auto &num: blacklisted_numbers.elements) {
-        bad_numbers_normalized.first.insert(num);
-        bad_numbers_normalized.second.insert(boost::regex_replace(num, e, ""));
+        bad_numbers_pair.first.insert(num);
+        bad_numbers_pair.second.insert(boost::regex_replace(num, e, ""));
     }
     for (auto &num: watched_numbers.elements) {
-        watched_numbers_normalized.first.insert(num);
-        watched_numbers_normalized.second.insert(boost::regex_replace(num, e, ""));
+        watched_numbers_pair.first.insert(num);
+        watched_numbers_pair.second.insert(boost::regex_replace(num, e, ""));
     }
 }
 

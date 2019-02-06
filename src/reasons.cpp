@@ -106,6 +106,8 @@ boost::regex shortened_url_answer_r(
         "(?is)://(?:w+\.)?(goo\.gl|bit\.ly|bit\.do|tinyurl\.com|fb\.me|cl\.ly|t\.co|is\.gd|j\.mp|tr\.im|"
         "wp\.me|alturl\.com|tiny\.cc|9nl\.me|post\.ly|dyo\.gs|bfy\.tw|amzn\.to|adf\.ly|adfoc\.us|"
         "surl\.cn\.com|clkmein\.com|bluenik\.com|rurl\.us|adyou\.co|buff\.ly|ow\.ly)/");
+boost::regex word_chars_r("(?u)[\W0-9]|http\S*");
+boost::regex non_latin_r("(?u)\p{script=Latin}|\p{script=Cyrillic}");
 
 /* General regexes and other things, used across multiple reasons */
 std::string se_sites_s ("(?:(?:[a-z]+\\.)*stackoverflow\\.com|(?:askubuntu|superuser|serverfault" 
@@ -120,6 +122,7 @@ boost::regex whitelisted_websites_regex (
         "|sstatic\\.net|imgur\\.com)\x08");
 boost::regex url_re ("(?i)<a href=\"https?://\S+");
 boost::regex link_re("<a href=\"([^\"]+)\"[^>]*>([^<]+)<\/a>");
+boost::regex all_but_digits_re("[^\d]");
 
 std::vector<std::string> se_sites_domains = {
     "stackoverflow.com", "askubuntu.com", "superuser.com", "serverfault.com", "mathoverflow.net",
@@ -429,6 +432,134 @@ std::vector<MatchReturn> misleading_link(Post p) {
     if (levenshtein(href_domain, text_domain) > LEVEN_DOMAIN_DISTANCE)
         ret[1] = MatchReturn(true, "misleading link", 
                     fmt::sprintf("Domain %s indicated by possible misleading text %s.", href_fld, text_fld));
+    return ret;
+}
+
+/* _TODO: repeating words in %s */
+/* _TODO: few unique characters in %s */
+/* _TODO: repeating characters in %s */
+
+/* _TODO: non-English link in answer */
+/* ^^^: looks like it has been discontinued, but is still present in Smokey's code? */
+
+/*
+ * mostly non-Latin %s
+ * majority of post is in non-Latin, non-Cyrillic characters
+ *
+ * stripcodeblocks = true
+ * exempt-sites = stackoverflow.com, ja.stackoverflow.com, pt.stackoverflow.com, es.stackoverflow.com,
+ *                islam.stackexchange.com, japanese.stackexchange.com, anime.stackexchange.com,
+ *                hinduism.stackexchange.com, judaism.stackexchange.com, buddhism.stackexchange.com,
+ *                chinese.stackexchange.com, french.stackexchange.com, spanish.stackexchange.com,
+ *                portugese.stackexchange.com, codegolf.stackexchange.com, korean.stackexchange.com,
+ *                ukrainian.stackexchange.com
+ */
+std::vector<MatchReturn> mostly_non_latin(Post p) {
+    std::vector<MatchReturn> ret(3, MatchReturn(false, "", ""));
+    
+    if (!p.title.empty()) {
+        std::string word_chars_title = boost::regex_replace(p.title, word_chars_r, "");
+        std::string non_latin_title = boost::regex_replace(word_chars_title, non_latin_r, "");
+        if (non_latin_title.length() > (0.4 * word_chars_title.length()))
+            ret[0] = MatchReturn(true, "mostly non-Latin title", 
+                        fmt::sprintf("Text contains %d non-Latin characters out of %d", 
+                            non_latin_title.length(), word_chars_title.length()));
+    }
+    if (!p.body.empty()) {
+        std::string word_chars = boost::regex_replace(p.body, word_chars_r, "");
+        std::string non_latin_chars = boost::regex_replace(p.body, non_latin_r, "");
+        if (non_latin_chars.length() > (0.4 * word_chars.length())) {
+            ret[1] = MatchReturn(true, "mostly non-Latin body",
+                        fmt::sprintf("Text contains %d non-Latin characters out of %d",
+                            non_latin_chars.length(), word_chars.length()));
+            if (is_answer(p))
+                ret[1].reason = "mostly non-Latin answer";
+        }
+    }
+    return ret;
+}
+
+/* Utility function for checking numbers.
+ * Since this is pretty much a filter, it doesn't fall in the utilities section */
+std::pair<bool, std::string> check_numbers(std::string s, std::set<std::string> numlist,
+        std::set<std::string> numlist_normalized) {
+    std::vector<std::string> matches; bool match = false;
+    std::string::const_iterator s_iter(s.cbegin());
+    std::smatch m;
+    while (boost::regex_search(s_iter, s.cend(), m, all_lists.r_numbers)) {
+        if (numlist.find(m[0]) != numlist.end()) {
+            match = true; matches.push_back(fmt::sprintf("%s found verbatim.", m[0]));
+            s_iter = m.suffix().first;
+            continue;
+        }
+        std::string normalized_candidate = boost::regex_replace(m[0], all_but_digits_re, ""); 
+        if (numlist_normalized.find(normalized_candidate) != numlist_normalized.end()) {
+            match = true; matches.push_back(fmt::sprintf("%s found normalized.", normalized_candidate));
+        }
+
+        s_iter = m.suffix().first;
+    }
+    if (match) 
+        return std::make_pair(true, join(matches, ';'));
+    return std::make_pair(false, "");
+}
+
+/*
+ * bad phone number in %s
+ *
+ * max_rep = 5
+ * max_score = 1
+ * stripcodeblocks = true
+ * sites = all
+ */
+std::vector<MatchReturn> bad_phone_number(Post p) {
+    std::vector<MatchReturn> ret(3, MatchReturn(false, "", ""));
+
+    if (!p.title.empty()) {
+        std::pair<bool, std::string> res = check_numbers(p.title,
+                all_lists.bad_numbers_pair.first, all_lists.bad_numbers_pair.second);
+        if (res.first) 
+            ret[0] = MatchReturn(true, "bad phone number in title", "Title - " + res.second);
+    }
+    if (!p.body.empty()) {
+        std::pair<bool, std::string> res = check_numbers(p.body,
+                all_lists.bad_numbers_pair.first, all_lists.bad_numbers_pair.second);
+        if (res.first) {
+            ret[1] = MatchReturn(true, "bad phone number in body", "Body - " + res.second);
+            if (is_answer(p))
+                ret[1].reason = "bad phone number in answer";
+        }
+    }
+    return ret;
+}
+
+/*
+ * potentially bad keyword in %s
+ * Checks for a potentially bad number
+ *
+ * max_rep = 5
+ * max_score = 1
+ * stripcodeblocks = true
+ * sites = all
+ */
+std::vector<MatchReturn> watched_phone_number(Post p) {
+    std::vector<MatchReturn> ret(3, MatchReturn(false, "", ""));
+
+    if (!p.title.empty()) {
+        std::pair<bool, std::string> res = check_numbers(p.title,
+                all_lists.watched_numbers_pair.first, all_lists.watched_numbers_pair.second);
+        if (res.first) 
+            ret[0] = MatchReturn(true, "potentially bad keyword in title", "Title - " + res.second);
+    }
+    if (!p.body.empty()) {
+        std::pair<bool, std::string> res = check_numbers(p.body,
+                all_lists.watched_numbers_pair.first, all_lists.watched_numbers_pair.second);
+        if (res.first) {
+            ret[1] = MatchReturn(true, "potentially bad keyword in body", "Body - " + res.second);
+            if (is_answer(p))
+                ret[1].reason = "potentially bad keyword in answer";
+        }
+    }
     return ret;
 }
 
