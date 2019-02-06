@@ -1,0 +1,24 @@
+ - Bulk post-check api call:
+        This api will take an array of posts (json), and then return an array of results, in the same
+        format as the single post-check call.
+        This will lead to a lesser number of API calls from SD.
+ - Switch to a websocket instead of HTTP API calls?
+ - What is `body_summary` in SD's rule implementations?
+ - Reduce code size in reasons.cpp, especially for regex-check based rules. Most of them do the same thing   , so we can generalise the regex functions, like in SD, with slight modifications to the Rule class.
+ - Whitelisted and Blacklisted users:
+        Maintain a separate List for these users. Then, operate them in a similar way as the others.
+        Whitelisted users will require some special changes (maybe a few lines) in the Rule::run method.
+ - Finish implementing all 112 reasons.
+ - More detailed "why" reports - https://github.com/Charcoal-SE/SmokeDetector/pull/2605
+ - Merge all "Bad keyword/blah blah in answer" with "blah blah in body"?
+ - a `!!/bisect` api endpoint?
+ - Network based checks - Google Perspective
+ - a logging system (spdlog)
+ - Whitelisted links
+ - Strip code blocks in Rule::run, if need be.
+
+----------------
+
+Pros of FG:
+    - Blacklist mods can be done with a single API call, which will change the list loaded in runtime mem.      This means no messy git pushes, and no need of rapid reload or SD reboot after CI pass.
+
