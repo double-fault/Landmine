@@ -12,10 +12,12 @@
 #include <cstring>
 #include <cstdlib>
 #include <algorithm>
+#include <functional>
 
 #include "json.hpp"
 #include "post.h"
 #include "findspam.h"
+#include "reasons.h"
 
 MatchReturn::MatchReturn(bool m, std::string r, std::string w) {
     match = m;
@@ -37,7 +39,7 @@ bool PostFilter::match(Post p) {
     if ((p.question && !question) || (!p.question && !answer)) {
         /* Wrong post type */
         return false;
-    } else if (!all_sites && sites.find(p.site) == sites.end()) {
+    } else if (all_sites == (sites.find(p.site) != sites.end())) {
         /* Post is on the wrong site */
         return false;
     } else if ((post.user_rep > max_rep) || (post.score > max_score)) {
@@ -47,6 +49,7 @@ bool PostFilter::match(Post p) {
     return true;
 }
 
+/* _TODO: stripcodeblocks option */
 Rule::Rule(std::function<std::vector<MatchReturn>(Post)> _func, int _type, int _priority,
         PostFilter _filter = PostFilter()) {
     func = _func;
@@ -63,7 +66,14 @@ std::pair<int, std::vector<MatchReturn>> Rule::run(Post p, int p_type) {
 
 FindSpam::FindSpam() {
     /* All spam-checking rules are added here */
-    /* _TODO: Add spam rules here, duh! */
+    rules.push_back(&misleading_link, 0, 1, PostFilter(true, {}, true, true, 10));
+    rules.push_back(&mostly_non_latin, 1, 1, PostFilter(true, {
+                "stackoverflow.com", "ja.stackoverflow.com", "pt.stackoverflow.com",
+                "es.stackoverflow.com", "islam.stackexchange.com", "japanese.stackexchange.com",
+                "anime.stackexchange.com", "hinduism.stackexchange.com", "judaism.stackexchange.com",
+                "buddhism.stackexchange.com", "chinese.stackexchange.com", "french.stackexchange.com",
+                "spanish.stackexchange.com", "portugese.stackexchange.com", "codegolf.stackexchange.com",
+                "korean.stackexchange.com", "ukrainian.stackexchange.com"});
 }
 
 json FindSpam::test_post(Post p, int post_type) {

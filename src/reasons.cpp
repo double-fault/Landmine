@@ -404,6 +404,8 @@ bool check_for_space(std::string s) {
  * max_rep = 10
  * max_score = 1
  * stripcodeblocks = true
+ * type = 0 (general)
+ * priority = 1 (not experimental)
  */
 std::vector<MatchReturn> misleading_link(Post p) {
     std::vector<MatchReturn> ret(3, MatchReturn(false, "", ""));
