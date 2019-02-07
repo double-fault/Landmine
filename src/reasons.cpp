@@ -44,7 +44,7 @@ boost::regex messaging_number_r ("(?i)(?<![a-z0-9])QQ?(?:(?:\w*[vw]x?|[^a-z0-9])
         "\d{4,5}(?![\"\d])|\bICQ[ :]{0,5}\d{9}\b|\bwh?atsa+pp?[ :+]{0,5}\d{10}");
 boost::regex number_only_r ("^(?=.*[0-9])[^\pL]*$");
 boost::regex one_unique_char_r ("^(.)\1+$");
-boost::regex link_in_nested_blockquotes_r ("(?:<blockquote>\s*){3,}<p><a href="([^<>]+)"[^<>]*>\1</a>\s*</p>\s*</blockquote>");
+boost::regex link_in_nested_blockquotes_r ("(?:<blockquote>\s*){3,}<p><a href=\"([^<>]+)\"[^<>]*>\1</a>\s*</p>\s*</blockquote>");
 boost::regex comma_at_end_r (".*\,$");
 boost::regex title_slash_r ("^\/.*\/$");
 boost::regex exc_bad_username_1_r ("^[A-Z][a-z]{3,7}(19\d{2})$");
@@ -533,6 +533,13 @@ std::vector<MatchReturn> bad_phone_number(Post p) {
     return ret;
 }
 
+/* _TODO: the two phone number detected in %s filters */
+/* Make sure the strip out some html tags: */
+/* body_to_check = regex.sub("<(?:a|img)[^>]+>", "", body_to_check) */
+
+/*
+ * phone number detected in title
+
 /*
  * potentially bad keyword in %s
  * Checks for a potentially bad number
@@ -616,6 +623,29 @@ std::vector<MatchReturn> bad_keyword(Post p) {
 }
 
 /* Bad keyword extensions */
+
+/* Filters yet to be implemented (probably incomplete list)
+/* _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L658-L676 
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L680-L710
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L749
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L752-L773
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L776-L785
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L808-L838
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L947-L969
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L972-L994
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L998-L1073
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L1091-L1129
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L1132-L1146
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L1163-L1202
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L1230-L1240
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L1243-L1262
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L1438-L1457
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L1460-L1484
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L1545-L1582
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L1585-L1605
+ * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L1622-L1661
+ * _TODO: (some of these have not been implemented) https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L1622-L1661
+ */
 
 /* 
  * potentially bad keyword in %s

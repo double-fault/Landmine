@@ -16,10 +16,10 @@
 #include <boost/xpressive/xpressive.hpp>
 
 int main(void) {
-    boost::xpressive::sregex r = boost::xpressive::sregex::compile("\b(?P<words>(?P<word>[a-z]+))(?:[][\\s.,;!/\()+_-]+(?P<words>(?P=word))){4,}\b");
-    std::string s("blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah");
+    boost::regex r("(?is)^[0-9a-z]{20,}\s*$");
+    std::string s = "blahblahblahaaaaaaaaaaaaaa";
 
-    fmt::print("{}\n", boost::xpressive::regex_match(s, r));
+    fmt::print("{}\n", boost::regex_match(s, r));
 
     return 0;
 }
