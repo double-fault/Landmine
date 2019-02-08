@@ -18,7 +18,7 @@
 class Post {
     public:
         Post(bool _question, std::string _site, int _score, int _user_rep,
-                std::string _body, std::string _username, std::string _title = "");
+                std::string _body, std::string _username, std::string _title, int _type);
     private:
         bool question;
         std::string site;
@@ -27,6 +27,7 @@ class Post {
         std::string body;
         std::string username;
         std::string title;
+        int type;
 }
 
 #endif /* Post_h */

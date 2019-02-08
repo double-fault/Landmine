@@ -44,15 +44,18 @@ class PostFilter {
 
 class Rule {
     public:
-        Rule(std::function<std::vector<MatchReturn>(Post)> _func, int _type, int _priority,
+        Rule(std::function<std::vector<MatchReturn>(Post)> _func, int _type, bool _stripcodeblocks,
                 PostFilter _filter = PostFilter());
-        std::pair<int, std::vector<MatchReturn>> run(Post p, int type);
+        std::vector<MatchReturn> run(Post p);
     private:
         /* First element is for title check, second for body check, third for username check */
         std::function<std::vector<MatchReturn>(Post)> func;
         PostFilter filter;
         int type;           /* 0 for all posts */
-        int priority;       /* 0 for experimental reasons, 1 for all others */
+        bool stripcodeblocks;
+
+        boost::regex code_sub_1;
+        boost::regex code_sub_2;
 }
 
 class FindSpam {

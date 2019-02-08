@@ -405,7 +405,6 @@ bool check_for_space(std::string s) {
  * max_score = 1
  * stripcodeblocks = true
  * type = 0 (general)
- * priority = 1 (not experimental)
  */
 std::vector<MatchReturn> misleading_link(Post p) {
     std::vector<MatchReturn> ret(3, MatchReturn(false, "", ""));
@@ -455,6 +454,7 @@ std::vector<MatchReturn> misleading_link(Post p) {
  *                chinese.stackexchange.com, french.stackexchange.com, spanish.stackexchange.com,
  *                portugese.stackexchange.com, codegolf.stackexchange.com, korean.stackexchange.com,
  *                ukrainian.stackexchange.com
+ * type = 0
  */
 std::vector<MatchReturn> mostly_non_latin(Post p) {
     std::vector<MatchReturn> ret(3, MatchReturn(false, "", ""));

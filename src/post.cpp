@@ -15,7 +15,7 @@
 #include "Post.h"
 
 Post::Post(bool _question, std::string _site, int _score, int _user_rep,
-        std::string _body, std::string _username, std::string _title = "") {
+        std::string _body, std::string _username, int _type, std::string _title) {
     question = _question;
     site = _site;
     score = _score;
@@ -23,5 +23,6 @@ Post::Post(bool _question, std::string _site, int _score, int _user_rep,
     body = _body;
     username = _username;
     title = _title;
+    type = _type;
 }
 
