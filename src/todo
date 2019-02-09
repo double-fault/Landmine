@@ -20,6 +20,7 @@
    behave well with them) https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L484
  - Finish all reasons (i.e, filters)
  - Check for a boost::regex exception, which indicates an invalid regex. Watch for this while loading all    lists (i.e, blacklists etc.) and also check all the regexes in reasons.cpp for this exception. Might al   so be useful when adding a new element to a list
+ - Throttling too many requests
 
 ----------------
 

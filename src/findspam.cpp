@@ -158,7 +158,7 @@ FindSpam::FindSpam() {
                     )));
 }
 
-json FindSpam::test_post(Post p, int post_type) {
+json FindSpam::test_post(Post p) {
     json ret; int idx = 0;
     ret["is_spam"] = 0;
     ret["reasons"] = json::array();

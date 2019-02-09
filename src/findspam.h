@@ -61,7 +61,7 @@ class Rule {
 class FindSpam {
     public:
         FindSpam();
-        json FindSpam::test_post(Post p, int post_type);
+        json FindSpam::test_post(Post p);
     private:
         std::vector<Rule> rules;
 }
