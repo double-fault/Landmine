@@ -114,7 +114,7 @@ FindSpam::FindSpam() {
     rules.push_back(Rule(&ext_2_pattern_matching_website, 0, false, PostFilter(true, {}, false)));
     rules.push_back(Rule(&ext_3_pattern_matching_website, 0, false, PostFilter(true, {
                     "fitness.stackexchange.com", "biology.stackexchange.com", "medicalsciences.stack"
-                    "exchange.com", "skeptics.stackexchange.com", "bicycles.stackexchange.com")));
+                    "exchange.com", "skeptics.stackexchange.com", "bicycles.stackexchange.com"})));
     rules.push_back(Rule(&bad_pattern_in_url, 0, true, PostFilter()));
     rules.push_back(Rule(&bad_keyword_with_link, 0, false, PostFilter(true, {}, false)));
     rules.push_back(Rule(&email_in_answer, 1, true, PostFilter(false, {
@@ -132,7 +132,30 @@ FindSpam::FindSpam() {
     rules.push_back(Rule(&one_character_link, 0, true, PostFilter(true, {}, true, true, 11)));
     rules.push_back(Rule(&linked_punctuation, 0, true, PostFilter(true, {"codegolf.stackexchange.com"},
                     false, true, 11)));
-    rules.push_back(Rule(&link_following_arrow, 1, 
+    rules.push_back(Rule(&link_following_arrow, 1, false, PostFilter(true, {}, true, false, 11)));
+    rules.push_back(Rule(&link_at_end_2, 1, false, PostFilter(true, {
+                    "raspberrypi.stackexchange.com", "softwarerecs.stackexchange.com"}, false)));
+    rules.push_back(Rule(&link_at_end_3, 1, false, PostFilter(true, {}, false)));
+    rules.push_back(Rule(&shortened_url_question, 1, false, PostFilter(true, {
+                    "superuser.com", "askubuntu.com"}, false)));
+    rules.push_back(Rule(&shortened_url_answer, 1, true, PostFilter(true, {"codegolf.stackexchange.com"},
+                    false)));
+    rules.push_back(Rule(&no_whitespace, 0, false, PostFilter(true, {}, true, true, 10000, 10000)));
+    rules.push_back(Rule(&messaging_number_detected, 0, true, PostFilter()));
+    rules.push_back(Rule(&numbers_only_title, 0, false, PostFilter(true, {"math.stackexchange.com"},
+                    true, false, 50, 5)));
+    rules.push_back(Rule(&one_unique_char_in_title, 0, false, PostFilter(true, {}, true, false, 1000000, 100000)));
+    rules.push_back(Rule(&link_inside_nested_blockquotes, 0, true, PostFilter()));
+    rules.push_back(Rule(&comma_at_title_end, 1, false, PostFilter(false, {
+                    "interpersonal.stackexchange.com"}, true, false, 50)));
+    rules.push_back(Rule(&title_starts_and_ends_with_slash, 0, PostFilter(true, {}, true, false)));
+    rules.push_back(Rule(&exc_blacklisted_username_1, 1, PostFilter(false, {"drupal.stackexchange.com"})));
+    rules.push_back(Rule(&exc_blacklisted_username_2, 1, PostFilter(false, {
+                    "parenting.stackexchange.com"})));
+    rules.push_back(Rule(&exc_blacklisted_username_3, 1, PostFilter(false, {"judaism.stackexchange.com"})));
+    rules.push_back(Rule(&exc_blacklisted_username_4, 1, PostFilter(false, {
+                    "hinduism.stackexchange.com", "judaism.stackexchange.com", "islam.stackexchange.com"},
+                    )));
 }
 
 json FindSpam::test_post(Post p, int post_type) {

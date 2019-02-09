@@ -1113,6 +1113,7 @@ std::vector<MatchReturn> linked_punctuation(Post p) {
  *
  * question-only = true
  * max_rep = 11
+ * sites = all
  */
 std::vector<MatchReturn> link_following_arrow(Post p) {
     std::vector<MatchReturn> ret;
@@ -1291,13 +1292,15 @@ std::vector<MatchReturn> messaging_number_detected(Post p) {
  * body = false
  * max_rep = 50
  * max_score = 5
- * excluding_sites = Math SE
+ * excluding_sites = math.stackexchange.com
  * question-only = true
  */
 std::vector<MatchReturn> numbers_only_title(Post p) {
     std::vector<MatchReturn> ret;
     MatchReturn o = MatchReturn(false, "", "");
     ret.push_back(o); ret.push_back(o); ret.push_back(o);
+
+    if (p.title.empty()) return ret;
 
     boost::smatch m;
     if (boost::regex_search(p.title, m, number_only_r)) 
@@ -1319,6 +1322,8 @@ std::vector<MatchReturn> one_unique_char_in_title(Post p) {
     MatchReturn o = MatchReturn(false, "", "");
     ret.push_back(o); ret.push_back(o); ret.push_back(o);
 
+    if (p.title.empty()) return ret;
+
     boost::smatch m;
     if (boost::regex_search(p.title, m, one_unique_char)) 
         ret[0] = MatchReturn(true, "Title has only one unique char", "Title - " + get_position(m));
@@ -1336,6 +1341,8 @@ std::vector<MatchReturn> link_inside_nested_blockquotes(Post p) {
     std::vector<MatchReturn> ret;
     MatchReturn o = MatchReturn(false, "", "");
     ret.push_back(o); ret.push_back(o); ret.push_back(o);
+
+    if (p.body.empty()) return ret;
 
     boost::smatch m;
     if (boost::regex_search(p.body, m, link_in_nested_blockquotes_r)) 
@@ -1357,7 +1364,7 @@ std::vector<MatchReturn> comma_at_title_end(Post p) {
     ret.push_back(o); ret.push_back(o); ret.push_back(o);
 
     boost::smatch m;
-    if (boost::regex_search(p.title, m, comma_at_end_r))
+    if (!p.title.empty() && boost::regex_search(p.title, m, comma_at_end_r))
         ret[0] = MatchReturn(true, "title ends with comma", "Title - " + get_position(m));
     return ret;
 }
@@ -1375,7 +1382,7 @@ std::vector<MatchReturn> title_starts_and_ends_with_slash(Post p) {
     ret.push_back(o); ret.push_back(o); ret.push_back(o);
 
     boost::smatch m;
-    if (boost::regex_search(p.title, m, title_slash_r)) {
+    if (!p.title.empty() && boost::regex_search(p.title, m, title_slash_r)) {
         ret[0] = MatchReturn(true, "title starts and ends with a forward slash", "Title - " + 
                 get_position(m));
     }
