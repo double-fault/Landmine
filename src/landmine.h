@@ -32,7 +32,7 @@ class Landmine {
     private:
         crow::SimpleApp app; /* To stop: app.stop(); */
         int port;
-        Post get_post_from_json(auto crow_json);
+        Post get_post_from_json(crow::json::rvalue crow_json);
         json generate_error_json(const std::runtime_error err);
         json generate_error_json(const std::exception &err);
         json generate_error_json(const std::string err);

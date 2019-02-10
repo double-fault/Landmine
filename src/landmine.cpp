@@ -94,7 +94,7 @@ Landmine::Landmine(int app_port) {
     spamchecker = FindSpam();
 }
 
-Post Landmine::get_post_from_json(auto crow_json) {
+Post Landmine::get_post_from_json(crow::json::rvalue crow_json) {
     bool is_question;
     std::string site;
     int score;
@@ -106,7 +106,7 @@ Post Landmine::get_post_from_json(auto crow_json) {
 
     const std::string key_not_found = "cannot find key";
     try {
-        is_question = crow_json["is_question"];
+        is_question = crow_json["is_question"].b();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
             throw ext::missing_question_bool;
@@ -114,7 +114,7 @@ Post Landmine::get_post_from_json(auto crow_json) {
     }
 
     try {
-        site = crow_json["site"];
+        site = crow_json["site"].s();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
             throw ext::missing_site;
@@ -122,7 +122,7 @@ Post Landmine::get_post_from_json(auto crow_json) {
     }
 
     try {
-        score = crow_json["score"];
+        score = crow_json["score"].i();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
             throw ext::missing_score;
@@ -130,7 +130,7 @@ Post Landmine::get_post_from_json(auto crow_json) {
     }
 
     try {
-        user_rep = crow_json["user_rep"];
+        user_rep = crow_json["user_rep"].i();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
             throw ext::missing_user_rep;
@@ -138,7 +138,7 @@ Post Landmine::get_post_from_json(auto crow_json) {
     }
 
     try {
-        body = crow_json["body"];
+        body = crow_json["body"].s();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found) 
             throw ext::missing_body;
@@ -146,7 +146,7 @@ Post Landmine::get_post_from_json(auto crow_json) {
     }
 
     try {
-        username = crow_json["username"];
+        username = crow_json["username"].s();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
             throw ext::missing_username;
@@ -154,7 +154,7 @@ Post Landmine::get_post_from_json(auto crow_json) {
     }
 
     try {
-        title = crow_json["title"];
+        title = crow_json["title"].s();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
             throw ext::missing_title;
@@ -162,7 +162,7 @@ Post Landmine::get_post_from_json(auto crow_json) {
     }
 
     try {
-        type = crow_json["type"];
+        type = crow_json["type"].i();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
             throw ext::missing_type;
@@ -204,23 +204,25 @@ void Landmine::init(void) {
     /* To mute info logs */
     /* crow::logger:setLogLevel(crow::LogLevel::Debug); */
 
+    int t = 0;
+
     CROW_ROUTE(app, "/posts/check")
-    ([](const crow::request &req) {
+    ([this](const crow::request &req) {
         auto crow_json = crow::json::load(req.body);
 
         Post p(false, "", -1, -1, "", "", "", -1);
         try {
             p = get_post_from_json(crow_json);
         } catch (const std::runtime_error &err) {
-            return ext::jsonresponse(400, generate_error_json(err)); 
+            return ext::jsonresponse{400, generate_error_json(err)}; 
         } catch (const std::exception &err) {
-            return ext::jsonresponse(400, generate_error_json(err));
+            return ext::jsonresponse{400, generate_error_json(err)};
         } catch (...) {
-            return ext::jsonresponse(500, generate_error_json(boost::current_exception_diagnostic_information()));
+            return ext::jsonresponse{500, generate_error_json(boost::current_exception_diagnostic_information())};
         }
 
         json ret = spamchecker.test_post(p);
-        return ext::jsonresponse(200, ret);
+        return ext::jsonresponse{200, ret};
     });
 }
 

@@ -30,7 +30,7 @@ void List::init(json o) {
     for (auto& ele: o.items()) {
         flag = 1;
         elements.push_back(ele.value());
-        consolidated += ele.value();
+        consolidated += ele.value().get<std::string>();
         consolidated += "|";
     }
     if (flag) consolidated.pop_back();
