@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <string>
 #include <algorithm>
+#include <set>
 
 #include "json.hpp"
 #include "post.h"
@@ -25,7 +26,7 @@ class MatchReturn {
         bool match;
         std::string reason;
         std::string why;
-}
+};
 
 /* General filter for SE posts */
 class PostFilter {
@@ -40,12 +41,12 @@ class PostFilter {
         int max_score;
         bool question;
         bool answer;
-}
+};
 
 class Rule {
     public:
         Rule(std::function<std::vector<MatchReturn>(Post)> _func, int _type, bool _stripcodeblocks,
-                PostFilter _filter = PostFilter());
+                PostFilter _filter);
         std::vector<MatchReturn> run(Post p);
     private:
         /* First element is for title check, second for body check, third for username check */
@@ -53,18 +54,15 @@ class Rule {
         PostFilter filter;
         int type;           /* 0 for all posts */
         bool stripcodeblocks;
-
-        boost::regex code_sub_1;
-        boost::regex code_sub_2;
-}
+};
 
 class FindSpam {
     public:
         FindSpam();
-        json FindSpam::test_post(Post p);
+        json test_post(Post p);
     private:
         std::vector<Rule> rules;
-}
+};
 
 #endif /* Findspam_h */
 

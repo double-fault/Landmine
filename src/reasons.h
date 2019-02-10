@@ -18,7 +18,7 @@
 
 /* All reasons/rules/filters */
 std::vector<MatchReturn> misleading_link(Post p);
-std::vector<MatchReturn> mostly_non_latin(post p);
+std::vector<MatchReturn> mostly_non_latin(Post p);
 std::vector<MatchReturn> bad_phone_number(Post p);
 std::vector<MatchReturn> watched_phone_number(Post p);
 std::vector<MatchReturn> blacklisted_username(Post p);

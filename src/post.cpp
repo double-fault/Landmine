@@ -12,10 +12,10 @@
 #include <algorithm>
 #include <string>
 
-#include "Post.h"
+#include "post.h"
 
 Post::Post(bool _question, std::string _site, int _score, int _user_rep,
-        std::string _body, std::string _username, int _type, std::string _title) {
+        std::string _body, std::string _username, std::string _title, int _type) {
     question = _question;
     site = _site;
     score = _score;

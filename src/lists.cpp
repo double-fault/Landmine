@@ -10,9 +10,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
+#include <fstream>
 
-#define FMT_HEADER_ONLY
 #include <fmt/format.h>
+#include <fmt/core.h>
+#include <fmt/printf.h>
 
 #include <boost/regex.hpp>
 
@@ -34,11 +36,11 @@ void List::init(json o) {
     if (flag) consolidated.pop_back();
 }
 
-List::get_consolidated_string(void) { return consolidated; }
+std::string List::get_consolidated_string(void) { return consolidated; }
 
 Lists::Lists(std::string file) {
     data_file = file;
-    std::ifstram i(data_file);
+    std::ifstream i(data_file);
     json j;
     i >> j;
 
@@ -50,20 +52,22 @@ Lists::Lists(std::string file) {
     blacklisted_numbers.init(j["blacklisted_numbers"]);
     watched_numbers.init(j["watched_numbers"]);
 
-    std::string temp = "(?is)(?:^|\b|(?w:\b))(?:%s)(?:\b|(?w:\b)|$)|%s";
-    r_bad_keywords = (fmt::sprintf(temp, bad_keywords.get_consolidated_string,
-                bad_keyword_nwb.get_consolidated_string));
+    std::string temp = "(?is)(?:^|\\b|(?w:\\b))(?:%s)(?:\\b|(?w:\\b)|$)|%s";
+    r_bad_keywords = (fmt::sprintf(temp, bad_keywords.get_consolidated_string(),
+                bad_keywords_nwb.get_consolidated_string()));
 
-    temp = "(?is)(?:^|\b|(?w:\b))(?:%s)(?:\b|(?w:\b)|$)";
-    r_watched_keywords = (fmt::sprintf(temp, watched_keywords.get_consolidated_string));
-
-    temp = "(?i)(%s)";
-    r_blacklisted_websites = (fmt::sprintf(temp, blacklisted_websites.get_consolidated_string));
+    temp = "(?is)(?:^|\\b|(?w:\\b))(?:%s)(?:\\b|(?w:\\b)|$)";
+    r_watched_keywords = (fmt::sprintf(temp, watched_keywords.get_consolidated_string()));
 
     temp = "(?i)(%s)";
-    r_blacklisted_usernames = (fmt::sprintf(temp, blacklisted_usernames.get_consolidated_string));
+    r_blacklisted_websites = (fmt::sprintf(temp, blacklisted_websites.get_consolidated_string()));
 
-    boost::regex e ("\D");
+    temp = "(?i)(%s)";
+    r_blacklisted_usernames = (fmt::sprintf(temp, blacklisted_usernames.get_consolidated_string()));
+
+    r_numbers = boost::regex("(?<=\\D|^)\\+?(?:\\d[\\W_]*){8,13}\\d(?=\\D|$)", boost::regex::icase);
+
+    const boost::regex e ("\\D");
     for (auto &num: blacklisted_numbers.elements) {
         bad_numbers_pair.first.insert(num);
         bad_numbers_pair.second.insert(boost::regex_replace(num, e, ""));
@@ -75,7 +79,7 @@ Lists::Lists(std::string file) {
 }
 
 std::pair<bool, std::string> match(std::string s, boost::regex e) {
-    std::smatch mat;
+    boost::smatch mat;
     
     int flag = 0;
     std::string ret = "";

@@ -8,7 +8,7 @@
 */
 
 #ifndef Post_h
-#define Command_h
+#define Post_h
 
 #include <cstdio>
 #include <cstdlib>
@@ -19,7 +19,6 @@ class Post {
     public:
         Post(bool _question, std::string _site, int _score, int _user_rep,
                 std::string _body, std::string _username, std::string _title, int _type);
-    private:
         bool question;
         std::string site;
         int score;
@@ -28,7 +27,7 @@ class Post {
         std::string username;
         std::string title;
         int type;
-}
+};
 
 #endif /* Post_h */
 

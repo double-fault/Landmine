@@ -7,20 +7,22 @@
  *
 */
 
-#include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <algorithm>
 #include <exception>
 
-#define FMT_HEADER_ONLY
 #include <fmt/format.h>
+#include <fmt/core.h>
+#include <fmt/printf.h>
+
+#include <boost/exception/all.hpp>
 
 #include "crow.h"
 #include "json.hpp"
 
 #include "post.h"
 #include "findspam.h"
+#include "landmine.h"
 
 using json = nlohmann::json;
 
@@ -28,53 +30,53 @@ using json = nlohmann::json;
 
 namespace ext {
     /* Exceptions */
-    class missing_question_bool: public std::runtime_error {
+    class _missing_question_bool: public std::exception {
         virtual const char* what() const throw() {
             return "missing field: boolean value \"is_question\" missing in provided json.";
         }
-    }
+    } missing_question_bool;
 
-    class missing_site: public std::runtime_error {
+    class _missing_site: public std::exception {
         virtual const char* what() const throw() {
             return "missing field: string \"site\" missing in provided json.";
         }
-    }
+    } missing_site;
 
-    class missing_score: public std::runtime_error {
+    class _missing_score: public std::exception {
         virtual const char* what() const throw() {
             return "missing field: int \"score\" missing in provided json; if score is unknown, include it as -1";
         }
-    }
+    } missing_score;
 
-    class missing_user_rep: public std::runtime_error {
+    class _missing_user_rep: public std::exception {
         virtual const char* what() const throw() {
             return "missing field: int \"user_rep\" missing in provided json; if rep is unknown, include it as -1";
         }
-    }
+    } missing_user_rep;
 
-    class missing_body: public std::runtime_error {
+    class _missing_body: public std::exception {
         virtual const char* what() const throw() {
             return "missing field: string \"body\" missing in provided json.";
         }
-    }
+    } missing_body;
 
-    class missing_username: public std::runtime_error {
+    class _missing_username: public std::exception {
         virtual const char* what() const throw() {
             return "missing field: string \"username\" missing in provided json.";
         }
-    }
+    } missing_username;
 
-    class missing_type: public std::runtime_error {
+    class _missing_type: public std::exception {
         virtual const char* what() const throw() {
             return "missing field: int \"type\" missing in provided json.";
         }
-    }
+    } missing_type;
 
-    class missing_title: public std::runtime_error {
+    class _missing_title: public std::exception {
         virtual const char* what() const throw() {
             return "missing field: string \"title\" missing in provided json.";
         }
-    }
+    } missing_title;
 
     /* Adapting nlohmann::json to crow::response */
     /* From https://github.com/ipkn/crow/issues/263#issuecomment-345588043 */
@@ -84,22 +86,7 @@ namespace ext {
             add_header("Access-COntrol-Allow-Headers", "Content-Type");
             add_header("Content-Type", "application/json");
         }
-    }
-}
-
-class Landmine {
-    public:
-        Landmine(int app_port);
-        void init(void);
-        void start(void);
-        void stop(void);
-    private:
-        crow::SimpleApp app; /* To stop: app.stop(); */
-        int port;
-        Post get_post_from_json(auto crow_json);
-        json generate_error_json(const std::runtime_error err);
-        json generate_error_json(const std::string err);
-        FindSpam spamchecker;
+    };
 }
 
 Landmine::Landmine(int app_port) {
@@ -122,7 +109,7 @@ Post Landmine::get_post_from_json(auto crow_json) {
         is_question = crow_json["is_question"];
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
-            throw ext::missing_is_question;
+            throw ext::missing_question_bool;
         throw err;
     }
 
@@ -182,10 +169,19 @@ Post Landmine::get_post_from_json(auto crow_json) {
         throw err;
     }
 
-    return Post(is_question, site, score, user_rep, body, username, type, title);
+    return Post(is_question, site, score, user_rep, body, username, title, type);
 }
 
 json Landmine::generate_error_json(const std::runtime_error err) {
+    json ret;
+    ret["error_id"] = 400;
+    ret["description"] = err.what();
+    ret["error_name"] = "bad_parameter";
+
+    return ret;
+}
+
+json Landmine::generate_error_json(const std::exception &err) {
     json ret;
     ret["error_id"] = 400;
     ret["description"] = err.what();
@@ -212,12 +208,15 @@ void Landmine::init(void) {
     ([](const crow::request &req) {
         auto crow_json = crow::json::load(req.body);
 
+        Post p(false, "", -1, -1, "", "", "", -1);
         try {
-            Post p = get_post_from_json(crow_json);
+            p = get_post_from_json(crow_json);
         } catch (const std::runtime_error &err) {
             return ext::jsonresponse(400, generate_error_json(err)); 
+        } catch (const std::exception &err) {
+            return ext::jsonresponse(400, generate_error_json(err));
         } catch (...) {
-            return ext::jsonresponse(500, generate_error_json(err.what()));
+            return ext::jsonresponse(500, generate_error_json(boost::current_exception_diagnostic_information()));
         }
 
         json ret = spamchecker.test_post(p);

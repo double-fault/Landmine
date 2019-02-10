@@ -20,6 +20,7 @@
 #include "post.h"
 #include "findspam.h"
 #include "reasons.h"
+#include "regex.h"
 
 MatchReturn::MatchReturn(bool m, std::string r, std::string w) {
     match = m;
@@ -27,8 +28,8 @@ MatchReturn::MatchReturn(bool m, std::string r, std::string w) {
     why = w;
 }
 
-PostFilter::PostFilter(bool _all_sites = true, std::set<std::string> _sites = {},
-        bool _question = true, bool _answer = true, int _max_rep = 1, int _max_score = 1) {
+PostFilter::PostFilter(bool _all_sites, std::set<std::string> _sites,
+        bool _question, bool _answer, int _max_rep, int _max_score) {
     all_sites = _all_sites;
     sites = _sites;
     question = _question;
@@ -44,7 +45,7 @@ bool PostFilter::match(Post p) {
     } else if (all_sites == (sites.find(p.site) != sites.end())) {
         /* Post is on the wrong site */
         return false;
-    } else if ((post.user_rep > max_rep) || (post.score > max_score)) {
+    } else if ((p.user_rep > max_rep) || (p.score > max_score)) {
         /* High rep or high score */
         return false;
     }
@@ -53,7 +54,7 @@ bool PostFilter::match(Post p) {
 
 /* _TODO: stripcodeblocks option */
 Rule::Rule(std::function<std::vector<MatchReturn>(Post)> _func, int _type, bool _stripcodeblocks,
-        PostFilter _filter = PostFilter()) {
+        PostFilter _filter) {
     func = _func;
     type = _type;
     stripcodeblocks = _stripcodeblocks;
@@ -61,8 +62,11 @@ Rule::Rule(std::function<std::vector<MatchReturn>(Post)> _func, int _type, bool 
 }
 
 std::vector<MatchReturn> Rule::run(Post p) {
-    if (!filter.match(p)) return false;
-    if (p.type != type && type != 0) return false;
+    std::vector<MatchReturn> error_ret(3, MatchReturn(false, "", ""));
+    if (!filter.match(p)) {
+        return error_ret;
+    }
+    if (p.type != type && type != 0) return error_ret;
 
     if (stripcodeblocks) {
         /* use a placeholder to avoid triggering "few unique characters" when most of post is code */
@@ -75,13 +79,7 @@ std::vector<MatchReturn> Rule::run(Post p) {
 }
 
 FindSpam::FindSpam() {
-    code_sub_1 = boost::regex("(?s)<pre>.*?</pre>");
-    code_sub_2 = boost::regex("(?s)<code>.*?</code>");
-
     /* All spam-checking rules are added here */
-    /* PostFilter(bool _all_sites = true, std::set<std::string> _sites = {}, 
-                bool _question = true, bool _answer = true, int _max_rep = 1, int _max_score = 1);
-                */
     rules.push_back(Rule(&misleading_link, 0, true, PostFilter(true, {}, true, true, 10)));
     rules.push_back(Rule(&mostly_non_latin, 0, true, PostFilter(true, {
                 "stackoverflow.com", "ja.stackoverflow.com", "pt.stackoverflow.com",
@@ -148,13 +146,13 @@ FindSpam::FindSpam() {
     rules.push_back(Rule(&link_inside_nested_blockquotes, 0, true, PostFilter()));
     rules.push_back(Rule(&comma_at_title_end, 1, false, PostFilter(false, {
                     "interpersonal.stackexchange.com"}, true, false, 50)));
-    rules.push_back(Rule(&title_starts_and_ends_with_slash, 0, PostFilter(true, {}, true, false)));
-    rules.push_back(Rule(&exc_blacklisted_username_1, 1, PostFilter(false, {"drupal.stackexchange.com"})));
-    rules.push_back(Rule(&exc_blacklisted_username_2, 1, PostFilter(false, {
+    rules.push_back(Rule(&title_starts_and_ends_with_slash, 0, false, PostFilter(true, {}, true, false)));
+    rules.push_back(Rule(&exc_blacklisted_username_1, 1, false, PostFilter(false, {"drupal.stackexchange.com"})));
+    rules.push_back(Rule(&exc_blacklisted_username_2, 1, false, PostFilter(false, {
                     "parenting.stackexchange.com"})));
-    rules.push_back(Rule(&exc_blacklisted_username_3, 1, PostFilter(false, {"judaism.stackexchange.com"})));
-    rules.push_back(Rule(&exc_blacklisted_username_4, 1, PostFilter(false, {
-                    "hinduism.stackexchange.com", "judaism.stackexchange.com", "islam.stackexchange.com"},
+    rules.push_back(Rule(&exc_blacklisted_username_3, 1, false, PostFilter(false, {"judaism.stackexchange.com"})));
+    rules.push_back(Rule(&exc_blacklisted_username_4, 1, false, PostFilter(false, {
+                    "hinduism.stackexchange.com", "judaism.stackexchange.com", "islam.stackexchange.com"}
                     )));
 }
 
