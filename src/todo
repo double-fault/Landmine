@@ -21,6 +21,11 @@
  - Finish all reasons (i.e, filters)
  - Check for a boost::regex exception, which indicates an invalid regex. Watch for this while loading all    lists (i.e, blacklists etc.) and also check all the regexes in reasons.cpp for this exception. Might al   so be useful when adding a new element to a list
  - Throttling too many requests
+ - Unicode boundaries? `?w` regex extension: https://github.com/Charcoal-SE/SmokeDetector/commit/36f62fce4c08eee9c04f019ed8a38a9cdc1582a1#diff-0763921f6af04c4a434786e1674a91c9R1127
+    - Removed `u` from `(?iu)` in multiple places (regex.cpp).
+    - Recognize Latin and Cyrillic characters; require unicode support (for "Mostly non-latin").
+ - Make all api calls async.
+ - Fix regex in "Bad pattern in URL" rule.
 
 ----------------
 

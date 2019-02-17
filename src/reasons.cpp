@@ -241,6 +241,8 @@ std::vector<MatchReturn> misleading_link(Post p) {
  *                ukrainian.stackexchange.com
  * type = 0
  */
+/* _TODO: fix the regex here */
+/*
 std::vector<MatchReturn> mostly_non_latin(Post p) {
     std::vector<MatchReturn> ret(3, MatchReturn(false, "", ""));
     
@@ -264,7 +266,7 @@ std::vector<MatchReturn> mostly_non_latin(Post p) {
         }
     }
     return ret;
-}
+} */
 
 /* Utility function for checking numbers.
  * Since this is pretty much a filter, it doesn't fall in the utilities section */
@@ -725,6 +727,8 @@ std::vector<MatchReturn> ext_3_pattern_matching_website(Post p) {
  * title = false
  * stripcodeblocks = true
  */
+/* _TODO: Fix the regex in this filter */
+/*
 std::vector<MatchReturn> bad_pattern_in_url(Post p) {
     std::vector<MatchReturn> ret;
     MatchReturn o(false, "", "");
@@ -749,7 +753,7 @@ std::vector<MatchReturn> bad_pattern_in_url(Post p) {
             + get_positions(matches));
     if (is_answer(p)) ret[1].reason = "bad pattern in url answer";
     return ret;
-}
+}*/
 
 /*
  * bad keyword with a link in %s

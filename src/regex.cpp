@@ -27,7 +27,8 @@ const boost::regex code_sub_2{"(?s)<code>.*?</code>"};
 /* _TODO: move these regexes to a separate global header file */
 
 /* Regexes for specific reasons */
-const boost::regex linked_punctuation_r ("(?iu)rel=i\"nofollow( noreferrer)?\">(?!><>)\\W+</a>");
+/* _TODO: Add unicode support for linked_punctuation_r (?iu) */
+const boost::regex linked_punctuation_r ("(?i)rel=\"nofollow( noreferrer)?\">(?!><>)\\W+</a>");
 const boost::regex title_whitespace_r ("(?is)^[0-9a-z]{20,}\\s*$");
 const boost::regex body_whitespace_r ("(?is)^<p>[0-9a-z]+</p>\\s*$");
 const boost::regex messaging_number_r ("(?i)(?<![a-z0-9])QQ?(?:(?:\\w*[vw]x?|[^a-z0-9])\\D{0,8})?\\d{5}[.-]?"
@@ -58,7 +59,7 @@ const boost::regex email_in_answer_r ("(?i)(?<![=#/])\\b[A-z0-9_.%+-]+@(?!(examp
         "{2,4})[A-z0-9_.%+-]+\\.[A-z]{2,4}\\b");
 const boost::regex email_in_question_r ("(?i)(?<![=#/])\\b[A-z0-9_.%+-]+@(?!(example|domain|site|foo|\\dx)\\.[A-z]"
         "{2,4})[A-z0-9_.%+-]+\\.[A-z]{2,4}\\b(?s)(?=.{,100}$)");
-const boost::regex one_character_link_r ("(?iu)\\w<a href=\"[^\"]+\" rel=\"nofollow( noreferrer)?\">.</a>\\w");
+const boost::regex one_character_link_r ("(?i)\\w<a href=\"[^\"]+\" rel=\"nofollow( noreferrer)?\">.</a>\\w");
 const boost::regex offensive_post_r (
         "(?is)\\b((?:ur\\Wm[ou]m|(yo)?u suck|[8B]={3,}[D>)]\\s*[.~]*|nigg[aeu][rh]?|(ass\\W?|a|a-)hole|"
         "daf[au][qk]|(?<!brain)(mother|mutha)?f\\W*u\\W*c?\\W*k+(a|ing?|e?[rd]| *off+| *(you|ye|u)(rself)?|"
@@ -67,10 +68,12 @@ const boost::regex offensive_post_r (
         "whore|cunt|jerk(ing)?\\W?off|cumm(y|ie)|butthurt|queef|lesbo|"
         "bitche?|(eat|suck|throbbing|sw[oe]ll(en|ing)?)\\b.{0,20}\\b(cock|dick)|dee[sz]e? nut[sz]|"
         "dumb\\W?ass|wet\\W?puss(y|ie)?|slut+y?|shot\\W?my\\W?(hot\\W?)?load)s?)\\b");
+/* _TODO: fix this */
+/*
 const boost::regex bad_url_pattern_r (
         "<a href=\"(?P<frag>[^\"]*-reviews?(?:-(?:canada|(?:and|or)-scam))?/?|[^\"]*-support/?)\"|" 
         "<a href=\"[^\"]*\"(?:\\s+\"[^\"]*\")*>(?P<frag>[^\"]" 
-        "*-reviews?(?:-(?:canada|(?:and|or)-scam))?/?|[^\"]*-support/?)</a>");
+        "*-reviews?(?:-(?:canada|(?:and|or)-scam))?/?|[^\"]*-support/?)</a>");*/
 const boost::regex praise_r(
         "(?i)\\b(nice|good|interesting|helpful|great|amazing) (article|blog|post|information)\\b|"
         "very useful");
@@ -96,8 +99,11 @@ const boost::regex shortened_url_answer_r(
         "(?is)://(?:w+\\.)?(goo\\.gl|bit\\.ly|bit\\.do|tinyurl\\.com|fb\\.me|cl\\.ly|t\\.co|is\\.gd|j\\.mp|tr\\.im|"
         "wp\\.me|alturl\\.com|tiny\\.cc|9nl\\.me|post\\.ly|dyo\\.gs|bfy\\.tw|amzn\\.to|adf\\.ly|adfoc\\.us|"
         "surl\\.cn\\.com|clkmein\\.com|bluenik\\.com|rurl\\.us|adyou\\.co|buff\\.ly|ow\\.ly)/");
-const boost::regex word_chars_r("(?u)[\\W0-9]|http\\S*");
-const boost::regex non_latin_r("(?u)\\p{script=Latin}|\\p{script=Cyrillic}");
+
+/* _TODO: Unicode support: edit `(?u)` in the starting of the following two regexes. */
+/* _TODO: Recognize Latin and Cyrillic characters using Boost.Regex */
+//const boost::regex word_chars_r("[\\W0-9]|http\\S*");
+//const boost::regex non_latin_r("\\p{script=Latin}|\\p{script=Cyrillic}");
 
 /* General regexes and other things, used across multiple reasons */
 std::string se_sites_s ("(?:(?:[a-z]+\\.)*stackoverflow\\.com|(?:askubuntu|superuser|serverfault" 
@@ -120,6 +126,7 @@ std::vector<std::string> se_sites_domains = {
 
 /* Patterns: the top four lines are the most straightforward, matching any site with this string in domain name */
 std::vector<std::string> pattern_websites = {
+    /*
     "(enstella|recoverysoftware|removevirus|support(number|help|quickbooks)|techhelp|calltech|exclusive|"
     "onlineshop|video(course|classes|tutorial(?!s))|vipmodel|(?<!word)porn|wholesale|inboxmachine|(get|buy)cheap|"
     "escort|diploma|(govt|government)jobs|extramoney|earnathome|spell(caster|specialist)|profits|"
@@ -143,7 +150,7 @@ std::vector<std::string> pattern_websites = {
     "trang)\\.(co|net|org|in(\\W|fo)|us)",
     "(health|earn|max|cash|wage|pay|pocket|cent|today)[\\w-]{0,6}\\d+\\.com",
     "(//|www\\.)healthy?\\w{5,}\\.com",
-    "https?://[\\w-.]\\.repair\\W", "https?://[\\w-.]{10,}\\.(top|help)\\W",
+    "https?://[\\w.-]\\.repair\\W", "https?://[\\w.-]{10,}\\.(top|help)\\W",
     "filefix(er)?\\.com", 
     "\\.page\\.tl\\W", 
     "infotech\\.(com|net|in)",
@@ -154,8 +161,10 @@ std::vector<std::string> pattern_websites = {
     "((essay|resume|click2)\\w{6,}|(essays|(research|term)paper|examcollection|[\\w-]{5}writing|"
     "writing[\\w-]{5})[\\w-]*?)\\.(com?|net|org|in(\\W|fo)|us|us)",
     "(top|best|expert)\\d\\w{0,15}\\.in\\W", 
-    "\\dth(\\.co)?\\.in", 
-    "(jobs|in)\\L<city>\\.in",
+    "\\dth(\\.co)?\\.in",
+    /* _TODO: V */
+    //"(jobs|in)\\L<city>\\.in",
+    /*
     "[\\w-](recovery|repairs?|rescuer|(?<!epoch|font)converter)(pro|kit)?\\.(com|net)",
     "(corrupt|repair)[\\w-]*?\\.blogspot",
     "http\\S*?(yahoo|gmail|hotmail|outlook|office|microsoft)?[\\w-]{0,10}"
@@ -173,17 +182,20 @@ std::vector<std::string> pattern_websites = {
     "\\w+vs\\w+live\\.(com|net|tv)",
     "(play|watch|cup|20)[\\w\\-]*?(live|online)\\.(com|net|tv)", 
     "worldcup\\d[\\w-]*?\\.(com|net|tv|blogspot)",
-    "https?://(\\w{5,}tutoring\\w*|cheat[\\w-.]{3,}|xtreme[\\w-]{5,})\\.",
+    "https?://(\\w{5,}tutoring\\w*|cheat[\\w.-]{3,}|xtreme[\\w-]{5,})\\.",
     "(platinum|paying|acai|buy|premium|premier|ultra|thebest|best|[/.]try)[\\w]{10,}\\.(co|net|org|in(\\W|fo)|us)",
     "(training|institute|marketing)[\\w-]{6,}[\\w.-]*?\\.(co|net|org|in(\\W|fo)|us)",
     "[\\w-](courses?|training)[\\w-]*?\\.in/",
     "\\w{9}(buy|roofing)\\.(co|net|org|in(\\W|fo)|us)",
     /* (something)health.(something)*/
+    /*
     "(vitamin|dive|hike|love|strong|ideal|natural|pro|magic|beware|top|best|free|cheap|allied|nutrition|"
     "prostate)[\\w-]*?health[\\w-]*?\\.(co|net|org|in(\\W\\|fo)|us|wordpress|blogspot|tumblr|webs\\.)",
     /* (something)cream.(something) */
+    /*
     "(eye|skin|age|aging)[\\w-]*?cream[\\w-]*?\\.(co|net|org|in(\\W|fo)|us|wordpress|blogspot|tumblr|webs\\.)",
     /* (keyword)(something)(keyword)(something).(something) */
+    /*
     "(acai|advance|aging|alpha|beauty|belle|beta|biotic|body|boost(?! solution)|brain(?!tree)|burn|colon|"
     "[^s]cream|cr[eè]me|derma|ecig|eye|face(?!book)|fat|formula|geniu[sx]|grow|hair|health|herbal|ideal|luminous|"
     "male|medical|medicare|muscle|natura|no2|nutrition|optimal|pearl|perfect|phyto|probio|rejuven|revive|ripped|"
@@ -201,7 +213,7 @@ std::vector<std::string> pattern_websites = {
     "(replica[^nt]\\w{5,}|\\wrolex)\\.(co|net|org|in(\\W|fo)|us)",
     "customer(service|support)[\\w-]*?\\.(co|net|org|in(\\W|fo)|us)",
     "conferences?alert[\\w-]*?\\.(co|net|org|in(\\W|fo)|us)",
-    "seo\\.com(?!/\\w\\)", 
+    "seo\\.com(?!/\\w)", 
     "\\Wseo(?!sitecheckup)[\\w-]{10,}\\.(com|net|in\\W)",
     "(?<!site)24x7[\\w-]*?\\.(co|net|org|in(\\W|fo)|us)",
     "backlink[\\w-]*?\\.(com|net|de|blogspot)",
@@ -227,7 +239,7 @@ std::vector<std::string> pattern_websites = {
     "ufc\\wfight\\wnight" /* Chiesa vs Lee spam */
 };
 
-const boost::regex pattern_websites_r(fmt::sprintf("(?i)(%s|[\\w-]*?(%s)[\\w-]*?\\.(com?|net|org|in(fo)?|us|blogspot|wordpress))(?![^>]*<)",
+const boost::regex pattern_websites_r(fmt::sprintf("(?i)((%s)|[\\w-]*?(%s)[\\w-]*?\\.(com?|net|org|in(fo)?|us|blogspot|wordpress))(?![^>]*<)",
             join(pattern_websites, '|'), join(all_lists.bad_keywords_nwb.elements, '|')));
 const boost::regex pattern_websites_ext_1_r(
         "(?i)\\b(?:[\\w-]{6,}|\\w*shop\\w*)(australia|brazil|canada|denmark|france|india|mexico|norway"

@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <exception>
+#include <cstdio>
 
 #include <fmt/format.h>
 #include <fmt/core.h>
@@ -104,6 +105,8 @@ Post Landmine::get_post_from_json(crow::json::rvalue crow_json) {
     std::string title;
     int type;
 
+    puts("here");
+
     const std::string key_not_found = "cannot find key";
     try {
         is_question = crow_json["is_question"].b();
@@ -169,6 +172,7 @@ Post Landmine::get_post_from_json(crow::json::rvalue crow_json) {
         throw err;
     }
 
+    puts("ret");
     return Post(is_question, site, score, user_rep, body, username, title, type);
 }
 
@@ -207,7 +211,9 @@ void Landmine::init(void) {
     int t = 0;
 
     CROW_ROUTE(app, "/posts/check")
+        .methods("GET"_method)
     ([this](const crow::request &req) {
+        fmt::print("{}\n", req.body);
         auto crow_json = crow::json::load(req.body);
 
         Post p(false, "", -1, -1, "", "", "", -1);

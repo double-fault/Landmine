@@ -52,11 +52,12 @@ Lists::Lists(std::string file) {
     blacklisted_numbers.init(j["blacklisted_numbers"]);
     watched_numbers.init(j["watched_numbers"]);
 
-    std::string temp = "(?is)(?:^|\\b|(?w:\\b))(?:%s)(?:\\b|(?w:\\b)|$)|%s";
+    /* XXX: Boost Regex error here (line below) */
+    std::string temp = "(?is)(?:^|\\b)(?:%s)(?:\\b|$)|%s"; 
     r_bad_keywords = (fmt::sprintf(temp, bad_keywords.get_consolidated_string(),
                 bad_keywords_nwb.get_consolidated_string()));
 
-    temp = "(?is)(?:^|\\b|(?w:\\b))(?:%s)(?:\\b|(?w:\\b)|$)";
+    temp = "(?is)(?:^|\\b)(?:%s)(?:\\b|$)";
     r_watched_keywords = (fmt::sprintf(temp, watched_keywords.get_consolidated_string()));
 
     temp = "(?i)(%s)";
@@ -65,7 +66,7 @@ Lists::Lists(std::string file) {
     temp = "(?i)(%s)";
     r_blacklisted_usernames = (fmt::sprintf(temp, blacklisted_usernames.get_consolidated_string()));
 
-    r_numbers = boost::regex("(?<=\\D|^)\\+?(?:\\d[\\W_]*){8,13}\\d(?=\\D|$)", boost::regex::icase);
+    r_numbers = boost::regex("((?<=\\D)|^)\\+?(?:\\d[\\W_]*){8,13}\\d(?=\\D|$)", boost::regex::icase);
 
     const boost::regex e ("\\D");
     for (auto &num: blacklisted_numbers.elements) {

@@ -81,13 +81,13 @@ std::vector<MatchReturn> Rule::run(Post p) {
 FindSpam::FindSpam() {
     /* All spam-checking rules are added here */
     rules.push_back(Rule(&misleading_link, 0, true, PostFilter(true, {}, true, true, 10)));
-    rules.push_back(Rule(&mostly_non_latin, 0, true, PostFilter(true, {
+    /*rules.push_back(Rule(&mostly_non_latin, 0, true, PostFilter(true, {
                 "stackoverflow.com", "ja.stackoverflow.com", "pt.stackoverflow.com",
                 "es.stackoverflow.com", "islam.stackexchange.com", "japanese.stackexchange.com",
                 "anime.stackexchange.com", "hinduism.stackexchange.com", "judaism.stackexchange.com",
                 "buddhism.stackexchange.com", "chinese.stackexchange.com", "french.stackexchange.com",
                 "spanish.stackexchange.com", "portugese.stackexchange.com", "codegolf.stackexchange.com",
-                "korean.stackexchange.com", "ukrainian.stackexchange.com"})));
+                "korean.stackexchange.com", "ukrainian.stackexchange.com"})));*/
     rules.push_back(Rule(&bad_phone_number, 0, true, PostFilter(true, {}, true, true, 5)));
     rules.push_back(Rule(&watched_phone_number, 0, true, PostFilter(true, {}, true, true, 5)));
     rules.push_back(Rule(&blacklisted_username, 1, false, PostFilter()));
@@ -113,7 +113,7 @@ FindSpam::FindSpam() {
     rules.push_back(Rule(&ext_3_pattern_matching_website, 0, false, PostFilter(true, {
                     "fitness.stackexchange.com", "biology.stackexchange.com", "medicalsciences.stack"
                     "exchange.com", "skeptics.stackexchange.com", "bicycles.stackexchange.com"})));
-    rules.push_back(Rule(&bad_pattern_in_url, 0, true, PostFilter()));
+    //rules.push_back(Rule(&bad_pattern_in_url, 0, true, PostFilter()));
     rules.push_back(Rule(&bad_keyword_with_link, 0, false, PostFilter(true, {}, false)));
     rules.push_back(Rule(&email_in_answer, 1, true, PostFilter(false, {
                     "biology.stackexchange.com", "bitcoin.stackexchange.com", "ell.stackexchange.com",
