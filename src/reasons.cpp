@@ -837,8 +837,6 @@ std::vector<MatchReturn> email_in_question(Post p) {
     ret.push_back(o); ret.push_back(o); ret.push_back(o);
 
     boost::smatch m;
-    if (!p.title.empty() && boost::regex_search(p.title, m, email_in_question_r))
-        ret[0] = MatchReturn(true, "email in title", "Title - " + get_position(m));
     if (!p.body.empty() && boost::regex_search(p.body, m, email_in_question_r))
         ret[1] = MatchReturn(true, "email in body", "Body - " + get_position(m));
     return ret;

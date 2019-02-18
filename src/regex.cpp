@@ -48,7 +48,7 @@ const boost::regex repeated_url_r ("(?s)<a href=\"(?:http://%20)?(https?://(?:(?
                 "\" rel=\"nofollow( noreferrer)?\">"
                 "(?="
                 ".{300,}<a href=\"(?:http://%20)?\\1\" "
-                "rel=\"nofollow( noreferrer)?\">(?:http://%20)?\\1</a><Paste>"
+                "rel=\"nofollow( noreferrer)?\">(?:http://%20)?\\1</a>"
         "(?:</strong>)?\\W*</p>\\s*$"
         ")");
 const boost::regex url_in_title_r ("(?i)https?://(?!(www\\.)?(example|domain)\\.(com|net|org))[a-zA-Z0-9_.-]+\\.[a"
@@ -57,8 +57,8 @@ const boost::regex url_only_title_r ("(?i)^https?://(?!(www\\.)?(example|domain)
         "[a-zA-Z0-9_.-]+\\.[a-zA-Z]{2,4}(/\\S*)?$");
 const boost::regex email_in_answer_r ("(?i)(?<![=#/])\\b[A-z0-9_.%+-]+@(?!(example|domain|site|foo|\\dx)\\.[A-z]"
         "{2,4})[A-z0-9_.%+-]+\\.[A-z]{2,4}\\b");
-const boost::regex email_in_question_r ("(?i)(?<![=#/])\\b[A-z0-9_.%+-]+@(?!(example|domain|site|foo|\\dx)\\.[A-z]"
-        "{2,4})[A-z0-9_.%+-]+\\.[A-z]{2,4}\\b(?s)(?=.{,100}$)");
+const boost::regex email_in_question_r ("(?is)(?<![=#/])\\b[A-z0-9_.%+-]+@(?!(example|domain|site|foo|\\dx)\\.[A-z]"
+        "{2,4})[A-z0-9_.%+-]+\\.[A-z]{2,4}\\b(?=.{,100}$)");
 const boost::regex one_character_link_r ("(?i)\\w<a href=\"[^\"]+\" rel=\"nofollow( noreferrer)?\">.</a>\\w");
 const boost::regex offensive_post_r (
         "(?is)\\b((?:ur\\Wm[ou]m|(yo)?u suck|[8B]={3,}[D>)]\\s*[.~]*|nigg[aeu][rh]?|(ass\\W?|a|a-)hole|"
@@ -126,12 +126,12 @@ std::vector<std::string> se_sites_domains = {
 
 /* Patterns: the top four lines are the most straightforward, matching any site with this string in domain name */
 std::vector<std::string> pattern_websites = {
-    /*
+    
     "(enstella|recoverysoftware|removevirus|support(number|help|quickbooks)|techhelp|calltech|exclusive|"
     "onlineshop|video(course|classes|tutorial(?!s))|vipmodel|(?<!word)porn|wholesale|inboxmachine|(get|buy)cheap|"
     "escort|diploma|(govt|government)jobs|extramoney|earnathome|spell(caster|specialist)|profits|"
     "seo-?(tool|service|trick|market)|onsale|fat(burn|loss)|(\\.|//|best)cheap|online-?(training|solution)"
-    "|\\bbabasupport\\b|movieshook)"
+    "|\\bbabasupport\\b|movieshook|where\\w*to\\w*buy)"
     "[\\w-]*\\.(com?|net|org|in(\\W|fo)|us|ir|wordpress|blogspot|tumblr|webs(?=\\.)|info)",
     "(replica(?!t)|rs\\d?gold|rssong|runescapegold|maxgain|e-cash|mothers?day|phone-?number|fullmovie|tvstream|"
     "trainingin|dissertation|(placement|research)-?(paper|statement|essay)|digitalmarketing|infocampus|freetrial|"
@@ -164,8 +164,8 @@ std::vector<std::string> pattern_websites = {
     "\\dth(\\.co)?\\.in",
     /* _TODO: V */
     //"(jobs|in)\\L<city>\\.in",
-    /*
-    "[\\w-](recovery|repairs?|rescuer|(?<!epoch|font)converter)(pro|kit)?\\.(com|net)",
+    /* Epoch has been hastily reduced to `epoc` for a fixed-width lookbehind. */
+    "[\\w-](recovery|repairs?|rescuer|(?<!epoc|font)converter)(pro|kit)?\\.(com|net)",
     "(corrupt|repair)[\\w-]*?\\.blogspot",
     "http\\S*?(yahoo|gmail|hotmail|outlook|office|microsoft)?[\\w-]{0,10}"
     "(account|tech|customer|support|service|phone|help)[\\w-]{0,10}(service|"
@@ -188,14 +188,11 @@ std::vector<std::string> pattern_websites = {
     "[\\w-](courses?|training)[\\w-]*?\\.in/",
     "\\w{9}(buy|roofing)\\.(co|net|org|in(\\W|fo)|us)",
     /* (something)health.(something)*/
-    /*
     "(vitamin|dive|hike|love|strong|ideal|natural|pro|magic|beware|top|best|free|cheap|allied|nutrition|"
     "prostate)[\\w-]*?health[\\w-]*?\\.(co|net|org|in(\\W\\|fo)|us|wordpress|blogspot|tumblr|webs\\.)",
     /* (something)cream.(something) */
-    /*
     "(eye|skin|age|aging)[\\w-]*?cream[\\w-]*?\\.(co|net|org|in(\\W|fo)|us|wordpress|blogspot|tumblr|webs\\.)",
     /* (keyword)(something)(keyword)(something).(something) */
-    /*
     "(acai|advance|aging|alpha|beauty|belle|beta|biotic|body|boost(?! solution)|brain(?!tree)|burn|colon|"
     "[^s]cream|cr[eè]me|derma|ecig|eye|face(?!book)|fat|formula|geniu[sx]|grow|hair|health|herbal|ideal|luminous|"
     "male|medical|medicare|muscle|natura|no2|nutrition|optimal|pearl|perfect|phyto|probio|rejuven|revive|ripped|"

@@ -115,16 +115,18 @@ FindSpam::FindSpam() {
                     "exchange.com", "skeptics.stackexchange.com", "bicycles.stackexchange.com"})));
     //rules.push_back(Rule(&bad_pattern_in_url, 0, true, PostFilter()));
     rules.push_back(Rule(&bad_keyword_with_link, 0, false, PostFilter(true, {}, false)));
+    /* _TODO: this doesn't work */
     rules.push_back(Rule(&email_in_answer, 1, true, PostFilter(false, {
                     "biology.stackexchange.com", "bitcoin.stackexchange.com", "ell.stackexchange.com",
                     "english.stackexchange.com", "expatriates.stackexchange.com", "gaming.stackexchange.com",
                     "medicalsciences.stackexchange.com", "money.stackexchange.com", 
                     "parenting.stackexchange.com", "rpg.stackexchange.com", "scifi.stackexchange.com",
                     "travel.stackexchange.com", "worldbuilding.stackexchange.com"}, false)));
+    /* _TODO: this doesn't work either */
     rules.push_back(Rule(&email_in_question, 1, true, PostFilter(false, {
                     "biology.stackexchange.com", "bitcoin.stackexchange.com", "ell.stackexchange.com",
                     "english.stackexchange.com", "expatriates.stackexchange.com", "gaming.stackexchange.com",
-                    "medicalsciences.stackexchange.com", "moneystackexchange.com",
+                    "medicalsciences.stackexchange.com", "money.stackexchange.com",
                     "parenting.stackexchange.com", "rpg.stackexchange.com", "scifi.stackexchange.com",
                     "travel.stackexchange.com", "worldbuilding.stackexchange.com"}, true, false)));
     rules.push_back(Rule(&one_character_link, 0, true, PostFilter(true, {}, true, true, 11)));
