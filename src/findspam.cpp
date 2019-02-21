@@ -129,9 +129,9 @@ FindSpam::FindSpam() {
                     "medicalsciences.stackexchange.com", "money.stackexchange.com",
                     "parenting.stackexchange.com", "rpg.stackexchange.com", "scifi.stackexchange.com",
                     "travel.stackexchange.com", "worldbuilding.stackexchange.com"}, true, false)));
-    rules.push_back(Rule(&one_character_link, 0, true, PostFilter(true, {}, true, true, 11)));
     rules.push_back(Rule(&linked_punctuation, 0, true, PostFilter(true, {"codegolf.stackexchange.com"},
                     false, true, 11)));
+    /* _TODO: *sigh* not working either */
     rules.push_back(Rule(&link_following_arrow, 1, false, PostFilter(true, {}, true, false, 11)));
     rules.push_back(Rule(&link_at_end_2, 1, false, PostFilter(true, {
                     "raspberrypi.stackexchange.com", "softwarerecs.stackexchange.com"}, false)));

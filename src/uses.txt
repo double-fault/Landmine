@@ -3,3 +3,4 @@
 3. faup
 4. fmt/format.h
 5. Boost Regex
+6. spdlog

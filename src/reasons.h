@@ -37,7 +37,6 @@ std::vector<MatchReturn> bad_pattern_in_url(Post p);
 std::vector<MatchReturn> bad_keyword_with_link(Post p);
 std::vector<MatchReturn> email_in_answer(Post p);
 std::vector<MatchReturn> email_in_question(Post p);
-std::vector<MatchReturn> one_character_link(Post p);
 std::vector<MatchReturn> linked_punctuation(Post p);
 std::vector<MatchReturn> link_following_arrow(Post p);
 std::vector<MatchReturn> link_at_end_1(Post p);

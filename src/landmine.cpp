@@ -24,73 +24,11 @@
 #include "post.h"
 #include "findspam.h"
 #include "landmine.h"
+#include "extensions.h"
 
 using json = nlohmann::json;
 
-/* Extensions */
-
-namespace ext {
-    /* Exceptions */
-    class _missing_question_bool: public std::exception {
-        virtual const char* what() const throw() {
-            return "missing field: boolean value \"is_question\" missing in provided json.";
-        }
-    } missing_question_bool;
-
-    class _missing_site: public std::exception {
-        virtual const char* what() const throw() {
-            return "missing field: string \"site\" missing in provided json.";
-        }
-    } missing_site;
-
-    class _missing_score: public std::exception {
-        virtual const char* what() const throw() {
-            return "missing field: int \"score\" missing in provided json; if score is unknown, include it as -1";
-        }
-    } missing_score;
-
-    class _missing_user_rep: public std::exception {
-        virtual const char* what() const throw() {
-            return "missing field: int \"user_rep\" missing in provided json; if rep is unknown, include it as -1";
-        }
-    } missing_user_rep;
-
-    class _missing_body: public std::exception {
-        virtual const char* what() const throw() {
-            return "missing field: string \"body\" missing in provided json.";
-        }
-    } missing_body;
-
-    class _missing_username: public std::exception {
-        virtual const char* what() const throw() {
-            return "missing field: string \"username\" missing in provided json.";
-        }
-    } missing_username;
-
-    class _missing_type: public std::exception {
-        virtual const char* what() const throw() {
-            return "missing field: int \"type\" missing in provided json.";
-        }
-    } missing_type;
-
-    class _missing_title: public std::exception {
-        virtual const char* what() const throw() {
-            return "missing field: string \"title\" missing in provided json.";
-        }
-    } missing_title;
-
-    /* Adapting nlohmann::json to crow::response */
-    /* From https://github.com/ipkn/crow/issues/263#issuecomment-345588043 */
-    struct jsonresponse: crow::response {
-        jsonresponse(int _code, const nlohmann::json &_body): crow::response{_code, _body.dump()} {
-            add_header("Access-Control-Allow-Origin", "*");
-            add_header("Access-COntrol-Allow-Headers", "Content-Type");
-            add_header("Content-Type", "application/json");
-        }
-    };
-}
-
-Landmine::Landmine(int app_port) {
+Landmine::Landmine(int app_port): auth("auth.json") {
     port = app_port;
     spamchecker = FindSpam();
 }
@@ -110,7 +48,7 @@ Post Landmine::get_post_from_json(crow::json::rvalue crow_json) {
         is_question = crow_json["is_question"].b();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
-            throw ext::missing_question_bool;
+            throw ext::req::missing_question_bool();
         throw err;
     }
 
@@ -118,7 +56,7 @@ Post Landmine::get_post_from_json(crow::json::rvalue crow_json) {
         site = crow_json["site"].s();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
-            throw ext::missing_site;
+            throw ext::req::missing_site();
         throw err;
     }
 
@@ -126,7 +64,7 @@ Post Landmine::get_post_from_json(crow::json::rvalue crow_json) {
         score = crow_json["score"].i();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
-            throw ext::missing_score;
+            throw ext::req::missing_score();
         throw err;
     }
 
@@ -134,7 +72,7 @@ Post Landmine::get_post_from_json(crow::json::rvalue crow_json) {
         user_rep = crow_json["user_rep"].i();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
-            throw ext::missing_user_rep;
+            throw ext::req::missing_user_rep();
         throw err;
     }
 
@@ -142,7 +80,7 @@ Post Landmine::get_post_from_json(crow::json::rvalue crow_json) {
         body = crow_json["body"].s();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found) 
-            throw ext::missing_body;
+            throw ext::req::missing_body();
         throw err;
     }
 
@@ -150,7 +88,7 @@ Post Landmine::get_post_from_json(crow::json::rvalue crow_json) {
         username = crow_json["username"].s();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
-            throw ext::missing_username;
+            throw ext::req::missing_username();
         throw err;
     }
 
@@ -158,7 +96,7 @@ Post Landmine::get_post_from_json(crow::json::rvalue crow_json) {
         title = crow_json["title"].s();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
-            throw ext::missing_title;
+            throw ext::req::missing_title();
         throw err;
     }
 
@@ -166,7 +104,7 @@ Post Landmine::get_post_from_json(crow::json::rvalue crow_json) {
         type = crow_json["type"].i();
     } catch (const std::runtime_error &err) {
         if (err.what() == key_not_found)
-            throw ext::missing_type;
+            throw ext::req::missing_type();
         throw err;
     }
 
@@ -201,6 +139,31 @@ json Landmine::generate_error_json(const std::string err) {
     return ret;
 }
 
+json Landmine::generate_error_json(int error_id, std::string desc, std::string error_name) {
+    json ret;
+    ret["error_id"] = error_id;
+    ret["description"] = desc;
+    ret["error_name"] = error_name;
+
+    return ret;
+}
+
+std::pair<bool, json> Landmine::authenticate(
+        int clearance_req, crow::json::rvalue crow_json) {
+    bool retv;
+    try {
+        retv = auth.verify(clearance_req, crow_json);
+    } catch (const std::exception &err) {
+        return std::make_pair(false, generate_error_json(401, err.what(), "missing_key"));
+    }
+    if (retv)
+        /* Messy hack */
+        return std::make_pair(true,
+                generate_error_json(200, "WTF; this shouldn't be seen anywhere", "wtf"));
+    return std::make_pair(false, 
+            generate_error_json(402, "Invalid api key or write token.", "invalid_key"));
+}
+
 void Landmine::init(void) {
     /* To mute info logs */
     /* crow::logger:setLogLevel(crow::LogLevel::Debug); */
@@ -212,19 +175,29 @@ void Landmine::init(void) {
     ([this](const crow::request &req) {
         auto crow_json = crow::json::load(req.body);
 
+        std::pair<bool, json> eret = authenticate(WRITE_ACCESS, crow_json);
+        if (!eret.first) return ext::resp::jsonresponse{eret.second["error_id"], eret.second};
+
         Post p(false, "", -1, -1, "", "", "", -1);
         try {
             p = get_post_from_json(crow_json);
         } catch (const std::runtime_error &err) {
-            return ext::jsonresponse{400, generate_error_json(err)}; 
+            return ext::resp::jsonresponse{400, generate_error_json(err)}; 
         } catch (const std::exception &err) {
-            return ext::jsonresponse{400, generate_error_json(err)};
+            return ext::resp::jsonresponse{400, generate_error_json(err)};
         } catch (...) {
-            return ext::jsonresponse{500, generate_error_json(boost::current_exception_diagnostic_information())};
+            return ext::resp::jsonresponse{500, 
+                generate_error_json(boost::current_exception_diagnostic_information())};
         }
 
         json ret = spamchecker.test_post(p);
-        return ext::jsonresponse{200, ret};
+        return ext::resp::jsonresponse{200, ret};
+    });
+
+    CROW_ROUTE(app, "/alive")
+        .methods("GET"_method)
+        ([this](const crow::request &req) {
+         return "Tick Tock. This Landmine is live; try not to step on it now, will you?";
     });
 }
 

@@ -59,7 +59,6 @@ const boost::regex email_in_answer_r ("(?i)(?<![=#/])\\b[A-z0-9_.%+-]+@(?!(examp
         "{2,4})[A-z0-9_.%+-]+\\.[A-z]{2,4}\\b");
 const boost::regex email_in_question_r ("(?is)(?<![=#/])\\b[A-z0-9_.%+-]+@(?!(example|domain|site|foo|\\dx)\\.[A-z]"
         "{2,4})[A-z0-9_.%+-]+\\.[A-z]{2,4}\\b(?=.{,100}$)");
-const boost::regex one_character_link_r ("(?i)\\w<a href=\"[^\"]+\" rel=\"nofollow( noreferrer)?\">.</a>\\w");
 const boost::regex offensive_post_r (
         "(?is)\\b((?:ur\\Wm[ou]m|(yo)?u suck|[8B]={3,}[D>)]\\s*[.~]*|nigg[aeu][rh]?|(ass\\W?|a|a-)hole|"
         "daf[au][qk]|(?<!brain)(mother|mutha)?f\\W*u\\W*c?\\W*k+(a|ing?|e?[rd]| *off+| *(you|ye|u)(rself)?|"

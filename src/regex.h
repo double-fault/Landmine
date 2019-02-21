@@ -43,7 +43,6 @@ extern const boost::regex url_in_title_r;
 extern const boost::regex url_only_title_r;
 extern const boost::regex email_in_answer_r;
 extern const boost::regex email_in_question_r;
-extern const boost::regex one_character_link_r;
 extern const boost::regex offensive_post_r;
 //extern const boost::regex bad_url_pattern_r;
 extern const boost::regex praise_r;

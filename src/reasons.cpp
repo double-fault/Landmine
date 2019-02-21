@@ -843,33 +843,6 @@ std::vector<MatchReturn> email_in_question(Post p) {
 }
 
 /*
- * one-character link in %s
- *
- * title = false
- * stripcodeblocks = true
- * max_rep = 11
- * max_score = 1
- * sites = all
- */
-std::vector<MatchReturn> one_character_link(Post p) {
-    std::vector<MatchReturn> ret;
-    MatchReturn o(false, "", "");
-    ret.push_back(o); ret.push_back(o); ret.push_back(o);
-
-    if (p.body.empty()) return ret;
-
-    bool is_a = is_answer(p);
-
-    boost::smatch m;
-    if (boost::regex_search(p.body, m, one_character_link_r)) {
-        ret[1] = MatchReturn(true, "one-character link in body", "body - " + get_position(m));
-        if (is_a)
-            ret[1].reason = "one-character link in answer";
-    }
-    return ret;
-}
-
-/*
  * linked punctuation in %s
  *
  * title = false

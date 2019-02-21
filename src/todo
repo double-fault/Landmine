@@ -26,6 +26,11 @@
     - Recognize Latin and Cyrillic characters; require unicode support (for "Mostly non-latin").
  - Make all api calls async.
  - Fix regex in "Bad pattern in URL" rule.
+ - Handle errors when the data file does not exist (blacklists and keys); maybe raise an exception?.
+ - Move all custom errors to a new error handling file.
+ - Handle malformed data files (custom exception?).
+ - Move utilities.cpp to extensions.cpp
+ - Check for memory leaks (use valgrind).
 
 ----------------
 

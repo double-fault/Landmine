@@ -20,6 +20,8 @@
 #include "post.h"
 #include "findspam.h"
 #include "lists.h"
+#include "extensions.h"
+#include "auth.h"
 
 using json = nlohmann::json;
 
@@ -36,7 +38,10 @@ class Landmine {
         json generate_error_json(const std::runtime_error err);
         json generate_error_json(const std::exception &err);
         json generate_error_json(const std::string err);
+        json generate_error_json(int error_id, std::string desc, std::string error_name);
         FindSpam spamchecker;
+        Auth auth;
+        std::pair<bool, json> authenticate(int clearance_req, crow::json::rvalue crow_json);
 };
 
 #endif /* Landmine_h */
