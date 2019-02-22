@@ -32,6 +32,7 @@ class Auth {
         Auth(std::string file);
         void save(void);
         bool verify(int clearance_req, crow::json::rvalue req_body);
+        bool revoke(std::string key, int type);
     private:
         std::string data_file;
 

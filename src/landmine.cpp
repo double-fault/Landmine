@@ -175,7 +175,7 @@ void Landmine::init(void) {
     ([this](const crow::request &req) {
         auto crow_json = crow::json::load(req.body);
 
-        std::pair<bool, json> eret = authenticate(WRITE_ACCESS, crow_json);
+        std::pair<bool, json> eret = authenticate(API_ACCESS, crow_json);
         if (!eret.first) return ext::resp::jsonresponse{eret.second["error_id"], eret.second};
 
         Post p(false, "", -1, -1, "", "", "", -1);
@@ -191,6 +191,33 @@ void Landmine::init(void) {
         }
 
         json ret = spamchecker.test_post(p);
+        return ext::resp::jsonresponse{200, ret};
+    });
+
+    CROW_ROUTE(app, "/keys/revoke")
+        .methods("DELETE"_method)
+    ([this](const crow::request &req) {
+        auto crow_json = crow::json::load(req.body);
+
+        std::pair<bool, json> eret = authenticate(API_ACCESS, crow_json);
+        if (!eret.first) return ext::resp::jsonresponse{eret.second["error_id"], eret.second};
+
+        json j = ext::crow_to_json(crow_json);
+        if (j.find("type") == j.end()) 
+            return ext::resp::jsonresponse{400, generate_error_json(400,
+                    "Missing field \"type\".", "bad_parameter")};
+
+        if (j["type"] == API_ACCESS)
+            auth.revoke(j["key"], API_ACCESS);
+        else if (j["type"] == WRITE_ACCESS) {
+            eret = authenticate(WRITE_ACCESS, crow_json);
+            if (!eret.first) return ext::resp::jsonresponse{eret.second["error_id"], eret.second};
+            auth.revoke(j["write_token"], WRITE_ACCESS);
+        } else
+            return ext::resp::jsonresponse{400, generate_error_json(400,
+                    fmt::sprintf("Invalid type %d.", j["type"]), "bad_parameter")};
+        json ret;
+        ret["status"] = "Key revoked.";
         return ext::resp::jsonresponse{200, ret};
     });
 

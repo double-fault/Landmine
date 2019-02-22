@@ -44,6 +44,23 @@ void Auth::save(void) {
     o << std::setw(4) << j << std::endl;
 }
 
+/* Returns false if key does not exist */
+bool Auth::revoke(std::string key, int type) {
+    /* Revoke api key */
+    if (type == API_ACCESS) {
+        bool ret = (api_keys.erase(key) > 0);
+        if (ret) save();
+        return ret;
+    }
+
+    if (type == WRITE_ACCESS) {
+        bool ret = (write_tokens.erase(key) > 0);
+        if (ret) save();
+        return ret;
+    }
+    return false;
+}
+
 bool Auth::verify(int clearance_req, crow::json::rvalue req_body) {
     if (clearance_req < API_ACCESS) return true;
     
