@@ -31,6 +31,7 @@
  - Handle malformed data files (custom exception?).
  - Move utilities.cpp to extensions.cpp
  - Check for memory leaks (use valgrind).
+ - Move to sets instead of vectors in Lists.
 
 ----------------
 

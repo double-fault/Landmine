@@ -10,6 +10,8 @@
 #include <string>
 #include <algorithm>
 #include <exception>
+#include <vector>
+#include <set>
 
 #include <fmt/format.h>
 #include <fmt/core.h>
@@ -63,8 +65,26 @@ namespace ext {
         }
     }
 
+    namespace err {
+        const char *invalid_list_identifier::what() const throw() {
+            return "invalid list identifier";
+        }
+    }
+
     json crow_to_json(crow::json::rvalue crow_json) {
         return json::parse(crow::json::dump(crow_json));
+    }
+
+    std::string join(std::vector<std::string> elements, char del) {
+        std::string ret;
+        for (auto &s:elements) ret += (s + del);
+        ret.pop_back(); return ret;
+    }
+
+    std::string join(std::set<std::string> elements, char del) {
+        std::string ret;
+        for (auto &s: elements) ret += (s + del);
+        ret.pop_back(); return ret;
     }
 }
 

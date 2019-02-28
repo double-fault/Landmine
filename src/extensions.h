@@ -79,8 +79,17 @@ namespace ext {
         };
     }
 
+    /* Miscellaneous errors */
+    namespace err {
+        class invalid_list_identifier: public std::exception {
+            virtual const char *what() const throw();
+        };
+    }
+
     /* Utilities */
     json crow_to_json(crow::json::rvalue crow_json);
+    std::string join(std::vector<std::string> elements, char del);
+    std::string join(std::set<std::string> elements, char del);
 }
 
 #endif /* Extensions_h */

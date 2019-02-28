@@ -19,21 +19,38 @@
 #include "findspam.h"
 #include "post.h"
 #include "lists.h"
+#include "extensions.h"
 
 List::List() {}
 
 void List::init(json o) {
     int flag = 0;
-    for (auto& ele: o.items()) {
+    for (const std::string &ele: o) {
         flag = 1;
-        elements.push_back(ele.value());
-        consolidated += ele.value().get<std::string>();
-        consolidated += "|";
+        elements.insert(ele);
     }
-    if (flag) consolidated.pop_back();
+    for (const std::string &ele: elements) {
+        fmt::print("{}\n", ele);
+    }
 }
 
-std::string List::get_consolidated_string(void) { return consolidated; }
+void List::add(std::string s) {
+    puts("inserting");
+    elements.insert(s);
+    for (const std::string &s: elements) fmt::print("{}\n", s);
+}
+
+void List::remove(std::string s) {
+    puts("removing");
+    elements.erase(s);
+}
+
+std::string List::get_consolidated_string(void) { 
+    std::string ret;
+    for (const std::string &s: elements) ret += s + '|';
+    if (ret.length() > 0) ret.pop_back();
+    return ret;
+}
 
 Lists::Lists(std::string file) {
     data_file = file;
@@ -49,7 +66,10 @@ Lists::Lists(std::string file) {
     blacklisted_numbers.init(j["blacklisted_numbers"]);
     watched_numbers.init(j["watched_numbers"]);
 
-    /* XXX: Boost Regex error here (line below) */
+    reload();
+}
+
+void Lists::reload(void) {
     std::string temp = "(?is)(?:^|\\b)(?:%s)(?:\\b|$)|%s"; 
     r_bad_keywords = (fmt::sprintf(temp, bad_keywords.get_consolidated_string(),
                 bad_keywords_nwb.get_consolidated_string()));
@@ -74,6 +94,65 @@ Lists::Lists(std::string file) {
         watched_numbers_pair.first.insert(num);
         watched_numbers_pair.second.insert(boost::regex_replace(num, e, ""));
     }
+}
+
+void Lists::save(void) {
+    json j;
+
+    j["bad_keywords"] = json::array(); j["bad_keywords_nwb"] = json::array();
+    j["watched_keywords"] = json::array(); j["blacklisted_websites"] = json::array();
+    j["blacklisted_usernames"] = json::array();
+    j["blacklisted_numbers"] = json::array(); j["watched_numbers"] = json::array();
+
+    for (const std::string &s: bad_keywords.elements) j["bad_keywords"].push_back(s);
+    for (const std::string &s: bad_keywords_nwb.elements) j["bad_keywords_nwb"].push_back(s);
+    for (const std::string &s: watched_keywords.elements) j["watched_keywords"].push_back(s);
+    for (const std::string &s: blacklisted_websites.elements) j["blacklisted_websites"].push_back(s);
+    for (const std::string &s: blacklisted_usernames.elements) j["blacklisted_usernames"].push_back(s);
+    for (const std::string &s: blacklisted_numbers.elements) j["blacklisted_numbers"].push_back(s);
+    for (const std::string &s: watched_numbers.elements) j["watched_numbers"].push_back(s);
+
+    /* _TODO: Handle cases where the file doesn't exist (does it matter when we are writing?) */
+    std::ofstream o(data_file);
+    o << std::setw(4) << j << std::endl;
+}
+
+List *Lists::get_list_from_identifier(std::string type) {
+    if (type == "bad_keywords")
+        return &bad_keywords;
+    if (type == "bad_keywords_nwb")
+        return &bad_keywords_nwb;
+    if (type == "watched_keywords")
+        return &watched_keywords;
+    if (type == "blacklisted_websites")
+        return &blacklisted_websites;
+    if (type == "blacklisted_usernames")
+        return &blacklisted_usernames;
+    if (type == "blacklisted_numbers")
+        return &blacklisted_numbers;
+    if (type == "watched_numbers")
+        return &watched_numbers;
+    throw ext::err::invalid_list_identifier();
+}
+
+/* This func throws ext::err::invalid_list_identifier from std::exception */
+void Lists::add(std::string to_add, std::string ident) {
+    List *l = get_list_from_identifier(ident);
+    l->add(to_add);
+
+    reload();
+    save();
+}
+
+bool Lists::remove(std::string to_remove, std::string ident) {
+    List *l = get_list_from_identifier(ident);
+    if (l->elements.find(to_remove) == l->elements.end()) return false;
+    l->remove(to_remove);
+
+    reload();
+    save();
+
+    return true;
 }
 
 std::pair<bool, std::string> match(std::string s, boost::regex e) {

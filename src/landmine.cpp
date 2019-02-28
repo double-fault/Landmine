@@ -25,6 +25,7 @@
 #include "findspam.h"
 #include "landmine.h"
 #include "extensions.h"
+#include "regex.h"
 
 using json = nlohmann::json;
 
@@ -159,9 +160,19 @@ std::pair<bool, json> Landmine::authenticate(
     if (retv)
         /* Messy hack */
         return std::make_pair(true,
-                generate_error_json(200, "WTF; this shouldn't be seen anywhere", "wtf"));
+                generate_error_json(200, "fuck; there is a bug. Contact a dev", "wtf"));
     return std::make_pair(false, 
             generate_error_json(402, "Invalid api key or write token.", "invalid_key"));
+}
+
+std::pair<bool, json> Landmine::required_params(std::vector<std::string> params, json body) {
+    for (const std::string &p: params) {
+        if (body.find(p) == body.end())
+            return std::make_pair(false, generate_error_json(400,
+                        fmt::sprintf("missing field: \"%s\"", p), "bad_parameter"));
+    }
+    return std::make_pair(true,
+            generate_error_json(200, "the fuck", "wtf"));
 }
 
 void Landmine::init(void) {
@@ -203,9 +214,8 @@ void Landmine::init(void) {
         if (!eret.first) return ext::resp::jsonresponse{eret.second["error_id"], eret.second};
 
         json j = ext::crow_to_json(crow_json);
-        if (j.find("type") == j.end()) 
-            return ext::resp::jsonresponse{400, generate_error_json(400,
-                    "Missing field \"type\".", "bad_parameter")};
+        eret = required_params({"type"}, j);
+        if (!eret.first) return ext::resp::jsonresponse{eret.second["error_id"], eret.second};
 
         if (j["type"] == API_ACCESS)
             auth.revoke(j["key"], API_ACCESS);
@@ -218,6 +228,53 @@ void Landmine::init(void) {
                     fmt::sprintf("Invalid type %d.", j["type"]), "bad_parameter")};
         json ret;
         ret["status"] = "Key revoked.";
+        return ext::resp::jsonresponse{200, ret};
+    });
+
+    CROW_ROUTE(app, "/blacklists/add")
+        .methods("POST"_method)
+    ([this](const crow::request &req) {
+        auto crow_json = crow::json::load(req.body);
+
+        std::pair<bool, json> eret = authenticate(WRITE_ACCESS, crow_json);
+        if (!eret.first) return ext::resp::jsonresponse{eret.second["error_id"], eret.second};
+
+        json j = ext::crow_to_json(crow_json);
+        eret = required_params({"regex", "identifier"}, j);
+        if (!eret.first) return ext::resp::jsonresponse{eret.second["error_id"], eret.second};
+
+        try {
+            all_lists.add(j["regex"], j["identifier"]);
+        } catch (const std::exception &err) {
+            return ext::resp::jsonresponse{400, generate_error_json(err)};
+        }
+        json ret;
+        ret["status"] = "Regex added.";
+        return ext::resp::jsonresponse{200, ret};
+    });
+
+    CROW_ROUTE(app, "/blacklists/remove")
+        .methods("POST"_method)
+    ([this](const crow::request &req) {
+        auto crow_json = crow::json::load(req.body);
+
+        std::pair<bool, json> eret = authenticate(WRITE_ACCESS, crow_json);
+        if (!eret.first) return ext::resp::jsonresponse{eret.second["error_id"], eret.second};
+
+        json j = ext::crow_to_json(crow_json);
+        eret = required_params({"regex", "identifier"}, j);
+        if (!eret.first) return ext::resp::jsonresponse{eret.second["error_id"], eret.second};
+
+        try {
+            bool ret = all_lists.remove(j["regex"], j["identifier"]);
+            if (!ret)
+                return ext::resp::jsonresponse{400, generate_error_json(400, 
+                        "regex does not exist in list", "bad_parameter")};
+        } catch (const std::exception &err) {
+            return ext::resp::jsonresponse{400, generate_error_json(err)};
+        }
+        json ret;
+        ret["status"] = "Regex removed.";
         return ext::resp::jsonresponse{200, ret};
     });
 

@@ -30,7 +30,7 @@
 #include "post.h"
 #include "findspam.h"
 #include "regex.h"
-#include "utility.h"
+#include "extensions.h"
 
 #define LEVEN_DOMAIN_DISTANCE 3
 
@@ -290,7 +290,7 @@ std::pair<bool, std::string> check_numbers(std::string s, std::set<std::string> 
         s_iter = m.suffix().first;
     }
     if (match) 
-        return std::make_pair(true, join(matches, ';'));
+        return std::make_pair(true, ext::join(matches, ';'));
     return std::make_pair(false, "");
 }
 

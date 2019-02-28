@@ -15,7 +15,7 @@
 #include <fmt/format.h>
 #include <fmt/core.h>
 
-#include "utility.h"
+#include "extensions.h"
 #include "regex.h"
 #include "lists.h"
 
@@ -236,7 +236,7 @@ std::vector<std::string> pattern_websites = {
 };
 
 const boost::regex pattern_websites_r(fmt::sprintf("(?i)((%s)|[\\w-]*?(%s)[\\w-]*?\\.(com?|net|org|in(fo)?|us|blogspot|wordpress))(?![^>]*<)",
-            join(pattern_websites, '|'), join(all_lists.bad_keywords_nwb.elements, '|')));
+            ext::join(pattern_websites, '|'), ext::join(all_lists.bad_keywords_nwb.elements, '|')));
 const boost::regex pattern_websites_ext_1_r(
         "(?i)\\b(?:[\\w-]{6,}|\\w*shop\\w*)(australia|brazil|canada|denmark|france|india|mexico|norway"
         "|pakistan|spain|sweden)\\w{0,4}\\.(com|net)");

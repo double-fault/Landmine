@@ -42,6 +42,7 @@ class Landmine {
         FindSpam spamchecker;
         Auth auth;
         std::pair<bool, json> authenticate(int clearance_req, crow::json::rvalue crow_json);
+        std::pair<bool, json> required_params(std::vector<std::string> params, json body);
 };
 
 #endif /* Landmine_h */
