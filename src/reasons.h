@@ -23,6 +23,8 @@ std::vector<MatchReturn> bad_phone_number(Post p);
 std::vector<MatchReturn> watched_phone_number(Post p);
 std::vector<MatchReturn> blacklisted_username(Post p);
 std::vector<MatchReturn> bad_keyword(Post p);
+std::vector<MatchReturn> has_customer_service(Post p);
+std::vector<MatchReturn> has_health(Post p);
 std::vector<MatchReturn> potentially_bad_keyword(Post p);
 std::vector<MatchReturn> blacklisted_website(Post p);
 std::vector<MatchReturn> repeated_url(Post p);

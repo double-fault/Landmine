@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 /* Boost should considerably bloat up this software, but std::regex currently only supports
  * ECMAScript, so we have no option (other than manually changing thousands of regexes) */
@@ -27,16 +28,14 @@
 #include <faup/options.h>
 #include <faup/output.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include "post.h"
 #include "findspam.h"
 #include "regex.h"
 #include "extensions.h"
 
 #define LEVEN_DOMAIN_DISTANCE 3
-
-/* _TODO: Create a global Lists object and add it to the to-be-created header file.
- *        Name the Lists object `all_lists`
- */
 
 /* Utility functions */
 /* _TODO: include these utility functions in the to-be-made header file as well */
@@ -68,6 +67,17 @@ bool is_whitelisted_website(std::string url) {
     boost::smatch m;
     if (boost::regex_search(url, m, whitelisted_websites_regex)) return true;
     return false;
+}
+
+std::vector<std::string> regex_findall(std::string s, boost::regex re) {
+    std::string::const_iterator search_start(s.cbegin());
+    boost::smatch m;
+    std::vector<std::string> ret;
+    while (boost::regex_search(search_start, s.cend(), m, re)) {
+        ret.push_back(m[0]);
+        search_start = m.suffix().first;
+    }
+    return ret;
 }
 
 /* The following function has been copied from https://rosettacode.org/wiki/Levenshtein_distance#C.2B.2B<Paste> */
@@ -411,9 +421,97 @@ std::vector<MatchReturn> bad_keyword(Post p) {
 
 /* Bad keyword extensions */
 
+/*
+ * bad keyword extension 1
+ * Scam aimed at %s customers.
+ * This aims at customer service scams.
+ *
+ * sites = all
+ */
+std::vector<MatchReturn> has_customer_service(Post p) {
+    std::vector<MacthReturn> ret(3, MatchReturn(false, "", ""));
+    if (p.body.empty()) return ret;
+
+    /* If applied to the body, the beginning should be enough; otherwise many false positives */
+    p.body = boost::algorithm::to_lower_copy(p.body.substr(0, std::min(p.body.length() - 1, 300)));
+    p.body = boost::regex_replace(p.body, symbols_r, ""); /* Deobfuscate */
+
+    std::unordered_set<std::string> s = {"askubuntu.com", "webapps.stackexchange.com", 
+        "webmasters.stackexchange.com"};
+
+    std::smatch m;
+    if (std::regex_search(p.body, m, customer_service_phrase_r) && (s.find(p.site) != s.end())) {
+        ret[1] = MatchReturn(true, "bad keyword in body", fmt::sprintf("Key phrase: *%s*", m[0]));
+        if (is_answer(p))
+            ret[1].reason = "bad keyword in answer";
+        return ret;
+    }
+    std::vector<std::string> business_matches = regex_findall(p.body, customer_service_business_r);
+    int n_digits = regex_findall(p.body, boost::regex(digits_re)).size();
+    if (business_matches.size() > 0 && n_digits >= 5) {
+        std::vector<std::string> keywords = regex_findall(p.body, customer_service_keywords_r);
+        std::set<std::string> s(keywords.begin(), keywords.end());
+        if (s.size() >= 2) {
+            ret[1] = MatchReturn(true, "bad keyword in body", fmt::sprintf(
+                        "Scam aimed at *%s* customers. Keywords: *%s*",
+                        ext::join(business_matches, ", "),
+                        ext::join(keywords, ", ")));
+            if (is_answer(p))
+                ret[1].reason = "bad keyword in answer";
+        }
+    }
+    return ret;
+}
+
+/* 
+ * bad keyword extension 2
+ * Health-themed spam.
+ * Bad health-related keywords in titles; health sites are exempt
+ *
+ * body = false
+ * question-only = true
+ * sites = stackoverflow.com, superuser.com, askubuntu.com, drupal.stackexchange.com,
+ *         meta.stackexchange.com, security.stackexchange.com, webapps.stackexchange.com,
+ *         apple.stackexchange.com, graphicdesign.stackexchange.com, workplace.stackexchange.com,
+ *         patents.stackexchange.com, money.stackexchange.com, gaming.stackexchange.com,
+ *         arduino.stackexchange.com
+ */
+std::vector<MatchReturn> has_health(Post p) {
+    std::vector<MatchReturn> ret(3, MatchReturn(false, "", ""));
+    if (p.title.empty()) return ret;
+
+    p.body = p.body.substr(0, std::min(p.body.length() - 1, 200));
+
+    /* Words beginning with a capital letter */
+    int num_capitalized = regex_findall(p.body, capitalized_re) >= 5;
+
+    boost::smatch organ_m, condition_m, goal_m, remedy_m, boast_m, other_m;
+    int organ     = (int) boost::regex_search(p.body, organ_m, health_organ_r);
+    int condition = (int) boost::regex_search(p.body, condition_m, health_condition_r);
+    int goal      = (int) boost::regex_search(p.body, goal_m, health_goal_r);
+    int remedy    = (int) boost::regex_search(p.body, remedy_m, health_remedy_r);
+    int boast     = (int) boost::regex_search(p.body, boast_m, health_boast_r);
+    int other     = (int) boost::regex_search(p.body, other_m, health_other_r);
+
+    int score = (4 * organ) + (2 * condition) + (2 * goal) + (2 * remedy) + boast + other
+        + num_capitalized;
+
+    if (score >= 8) {
+        std::vector<std::string> keywords;
+        if (organ) keywords.push_back(organ_m[0]);
+        if (condition) keywords.push_back(condition_m[0]);
+        if (goal) keywords.push_back(goal_m[0]);
+        if (remedy) keywords.push_back(remedy_m[0]);
+        if (boast) keywords.push_back(boast_m[0]);
+        if (other) keywords.push_back(other_m[0]);
+
+        ret[0] = MatchReturn(true, "bad keyword in title", fmt::sprintf(
+                    "Health-themed spam (score %d). Keywords: *%s*", score, ext::join(keywords, ", ")));
+    }
+    return ret;
+}
+
 /* Filters yet to be implemented (probably incomplete list)
- * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L658-L676 
- * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L680-L710
  * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L749
  * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L752-L773
  * _TODO: https://github.com/Charcoal-SE/SmokeDetector/blob/master/findspam.py#L776-L785

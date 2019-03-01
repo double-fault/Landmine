@@ -25,6 +25,8 @@ extern Lists all_lists;
 extern const boost::regex code_sub_1;
 extern const boost::regex code_sub_2;
 
+extern const boost::regex symbols_r;
+
 extern const boost::regex linked_punctuation_r;
 extern const boost::regex title_whitespace_r;
 extern const boost::regex body_whitespace_r;
@@ -53,6 +55,15 @@ extern const boost::regex link_at_end_2_r;
 extern const boost::regex link_at_end_3_r;
 extern const boost::regex shortened_url_question_r;
 extern const boost::regex shortened_url_answer_r;
+extern const boost::regex customer_service_business_r;
+extern const boost::regex customer_service_keywords_r;
+extern const boost::regex customer_service_phrase_r;
+extern const boost::regex health_organ_r;
+extern const boost::regex health_condition_r;
+extern const boost::regex health_goal_r;
+extern const boost::regex health_remedy_r;
+extern const boost::regex health_boast_r;
+extern const boost::regex health_other_r;
 //extern const boost::regex word_chars_r;
 //extern const boost::regex non_latin_r;
 
@@ -62,6 +73,8 @@ extern const boost::regex whitelisted_websites_regex;
 extern const boost::regex url_re;
 extern const boost::regex link_re;
 extern const boost::regex all_but_digits_re;
+extern const boost::regex digits_re;
+extern const boost::regex capitalized_re;
 
 extern std::vector<std::string> se_sites_domains;
 extern std::vector<std::string> pattern_websites;

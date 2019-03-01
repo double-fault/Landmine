@@ -90,6 +90,8 @@ namespace ext {
     json crow_to_json(crow::json::rvalue crow_json);
     std::string join(std::vector<std::string> elements, char del);
     std::string join(std::set<std::string> elements, char del);
+    std::string join(std::vector<std::string> elements, std::string del);
+    std::string join(std::set<std::string> elements, std::string del);
 }
 
 #endif /* Extensions_h */

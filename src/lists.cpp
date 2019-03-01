@@ -135,6 +135,7 @@ List *Lists::get_list_from_identifier(std::string type) {
     throw ext::err::invalid_list_identifier();
 }
 
+/* _TODO: Check if regex is valid before adding it */
 /* This func throws ext::err::invalid_list_identifier from std::exception */
 void Lists::add(std::string to_add, std::string ident) {
     List *l = get_list_from_identifier(ident);

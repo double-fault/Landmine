@@ -86,5 +86,17 @@ namespace ext {
         for (auto &s: elements) ret += (s + del);
         ret.pop_back(); return ret;
     }
+
+    std::string join(std::vector<std::string> elements, std::string del) {
+        std::string ret;
+        for (auto &s: elements) ret += (s + del);
+        ret.erase(ret.length() - del.length()); return ret;
+    }
+
+    std::string join(std::set<std::string> elements, std::string del) {
+        std::string ret;
+        for (auto &s: elements) ret += (s + del);
+        ret.erase(ret.length() - del.length()); return ret;
+    }
 }
 

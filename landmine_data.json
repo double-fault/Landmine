@@ -1,8 +1,24 @@
 {
-    "bad_keywords": ["adadsfczdadevsfeafdsrgsfrsfdrgasfaefed"],
-    "bad_keywords_nwb": ["jfrysgyfesycgegsdtcfstdftehafeteghksysyfhehwfts"],
-    "watched_keywords": ["ahgr gfvsgygerfgysghcgs fetufxsudgyfgdshfgsfs"],
-    "blacklisted_websites": ["uvft ayrefh  cyf ctwaftfsrtdtdsaftfye"],
-    "blacklisted_numbers": ["1313636352462547254273517dfvfscftehdcetsch6"],
-    "watched_numbers": ["3426r52tudvx6e5235sdxhcgvdzbjfbgers cvuy"]
+    "bad_keywords": [
+        "1234",
+        "abcde",
+        "adadsfczdadevsfeafdsrgsfrsfdrgasfaefed",
+        "hello world"
+    ],
+    "bad_keywords_nwb": [
+        "jfrysgyfesycgegsdtcfstdftehafeteghksysyfhehwfts"
+    ],
+    "blacklisted_numbers": [
+        "+1 (508) 819 2672"
+    ],
+    "blacklisted_usernames": [],
+    "blacklisted_websites": [
+        "uvft ayrefh  cyf ctwaftfsrtdtdsaftfye"
+    ],
+    "watched_keywords": [
+        "ahgr gfvsgygerfgysghcgs fetufxsudgyfgdshfgsfs"
+    ],
+    "watched_numbers": [
+        "3426r52tudvx6e5235sdxhcgvdzbjfbgers cvuy"
+    ]
 }

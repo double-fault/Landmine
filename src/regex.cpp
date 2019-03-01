@@ -21,10 +21,15 @@
 
 Lists all_lists("landmine_data.json");
 
+/* These regexes have been added based on commits before February 1st in findspam.py on Smokey's repo */
+
 const boost::regex code_sub_1{"(?s)<pre>.*?</pre>"};
 const boost::regex code_sub_2{"(?s)<code>.*?</code>"};
 
 /* _TODO: move these regexes to a separate global header file */
+
+/* Misc */
+const boost::regex symbols_r{"[^A-Za-z0-9\\s]"};
 
 /* Regexes for specific reasons */
 /* _TODO: Add unicode support for linked_punctuation_r (?iu) */
@@ -98,13 +103,43 @@ const boost::regex shortened_url_answer_r(
         "(?is)://(?:w+\\.)?(goo\\.gl|bit\\.ly|bit\\.do|tinyurl\\.com|fb\\.me|cl\\.ly|t\\.co|is\\.gd|j\\.mp|tr\\.im|"
         "wp\\.me|alturl\\.com|tiny\\.cc|9nl\\.me|post\\.ly|dyo\\.gs|bfy\\.tw|amzn\\.to|adf\\.ly|adfoc\\.us|"
         "surl\\.cn\\.com|clkmein\\.com|bluenik\\.com|rurl\\.us|adyou\\.co|buff\\.ly|ow\\.ly)/");
+const boost::regex customer_service_business_r(
+        "(?i)\\b(airlines?|apple|AVG|BT|netflix|dell|Delta|epson|facebook|gmail|google|hotmail|hp|"
+        "lexmark|mcafee|microsoft|norton|out[l1]ook|quickbooks|sage|windows?|yahoo)\\b");
+const boost::regex customer_service_keywords_r(
+        "(?i)\\b(customer|help|care|helpline|reservation|phone|recovery|service|support|"
+        "contact|tech|technical|telephone|number)\\b");
+const boost::regex customer_service_phrase_r(
+        "(tech(nical)? support)|((support|service|contact|help(line)?) (telephone|phone|number))");
+const boost::regex health_organs_r(
+        "(?i)\\b(colon|skin|muscle|bicep|fac(e|ial)|eye|brain|IQ|mind|head|hair|peni(s|le)|"
+        "breast|body|joint|belly|digest\\w*)s?\\b");
+const boost::regex health_condition_r(
+        "(?i)\\b(weight|constipat(ed|ion)|dysfunction|swollen|sensitive|wrinkle|aging|"
+        "suffer|acne|pimple|dry|clog(ged)?|inflam(ed|mation)|fat|age|pound)s?\\b");
+const boost::regex health_goal_r(
+        "(?i)\\b(supple|build|los[es]|power|burn|erection|tone(d)|rip(ped)?|bulk|get rid|mood)s?\\b|"
+        "\\b(diminish|look|reduc|beaut|renew|young|youth|lift|eliminat|enhance|energ|shred|"
+        "health(?!kit)|improve|enlarge|remov|vital|slim|lean|boost|str[oe]ng)");
+const boost::regex health_remedy_r(
+        "(?i)\\b(remed(y|ie)|serum|cleans?(e|er|ing)|care|(pro)?biotic|herbal|lotion|cream|"
+        "gel|cure|drug|formula|recipe|regimen|solution|therapy|hydration|soap|treatment|supplement|"
+        "diet|moist\\w*|injection|potion|ingredient|aid|exercise|eat(ing)?)s?\\b");
+const boost::regex health_boast_r(
+        "(?i)\\b(most|best|simple|top|pro|real|mirac(le|ulous)|secrets?|organic|natural|perfect|"
+        "ideal|fantastic|incredible|ultimate|important|reliable|critical|amazing|fast|good)\\b|"
+        "\\b(super|hyper|advantag|benefi|effect|great|valu|eas[iy])");
+const boost::regex health_other_r(
+        "(?i)\\b(product|thing|item|review|advi[cs]e|myth|make use|your?|really|work|tip|shop|"
+        "store|method|expert|instant|buy|fact|consum(e|ption)|baby|male|female|men|women|grow|"
+        "idea|suggest\\w*|issue)s?\\b");
 
 /* _TODO: Unicode support: edit `(?u)` in the starting of the following two regexes. */
 /* _TODO: Recognize Latin and Cyrillic characters using Boost.Regex */
 //const boost::regex word_chars_r("[\\W0-9]|http\\S*");
 //const boost::regex non_latin_r("\\p{script=Latin}|\\p{script=Cyrillic}");
 
-/* General regexes and other things, used across multiple reasons */
+/* General regexes and other things, sometimes used across multiple reasons */
 std::string se_sites_s ("(?:(?:[a-z]+\\.)*stackoverflow\\.com|(?:askubuntu|superuser|serverfault" 
         "|stackapps|imgur)\\.com|mathoverflow\\.net|(?:[a-z]+\\.)*stackexchange\\.com)");
 const boost::regex se_sites_re(se_sites_s);
@@ -118,6 +153,8 @@ const boost::regex whitelisted_websites_regex (
 const boost::regex url_re ("(?i)<a href=\"https?://\\S+");
 const boost::regex link_re("<a href=\"([^\"]+)\"[^>]*>([^<]+)<\\/a>");
 const boost::regex all_but_digits_re("[^\\d]");
+const boost::regex digits_re("\\d");
+const boost::regex capitalized_re("\\b[A-Z][a-z]");
 
 std::vector<std::string> se_sites_domains = {
     "stackoverflow.com", "askubuntu.com", "superuser.com", "serverfault.com", "mathoverflow.net",

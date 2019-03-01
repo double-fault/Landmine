@@ -278,6 +278,8 @@ void Landmine::init(void) {
         return ext::resp::jsonresponse{200, ret};
     });
 
+    /* _TODO: /blacklists/list: this route will list all present blacklists */
+
     CROW_ROUTE(app, "/alive")
         .methods("GET"_method)
         ([this](const crow::request &req) {
